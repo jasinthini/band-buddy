@@ -430,3 +430,120 @@
     margin-inline-start: 0;
   }
 }
+
+/* Band Buddy — Writing + History visual polish */
+.writing-page,
+.bh-page {
+  background:
+    radial-gradient(ellipse at 100% 0%, #d9edff 0, transparent 36rem),
+    linear-gradient(180deg, #f4f9ff 0, #edf4fb 100%);
+}
+
+/* The shared PracticeLayout already shows the brand. */
+.bb-practice-workspace .writing-page .wp-header,
+.bb-practice-workspace .bh-page .bh-topbar {
+  display: none;
+}
+
+.bb-practice-workspace .writing-page .wp-main {
+  width: 100%;
+  padding: 0 0 24px;
+}
+
+.writing-page .wp-heading,
+.bh-page .bh-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 150px;
+  padding: clamp(20px, 3vw, 34px);
+  padding-inline-end: clamp(140px, 20vw, 230px);
+  border: 1px solid #c5ddf4;
+  border-left: 4px solid #2476c7;
+  border-radius: 16px;
+  background: linear-gradient(115deg, #e2f1ff, #f6fbff);
+  color: #102f4a;
+  box-shadow: 0 8px 24px #143d6810;
+}
+
+/* Decorative notebook and pencil; no extra image file needed. */
+.writing-page .wp-heading::after,
+.bh-page .bh-hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset-block: 12px;
+  inset-inline-end: 18px;
+  width: clamp(108px, 16vw, 190px);
+  background: center / contain no-repeat
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 190 140'%3E%3Cellipse cx='100' cy='78' rx='82' ry='52' fill='%23d3eaff'/%3E%3Cpath d='M26 42q35-12 69 6 34-18 69-6v70q-35-11-69 7-34-18-69-7z' fill='%23fff' stroke='%236d9fc9' stroke-width='3'/%3E%3Cpath d='M95 49v69M39 59q21-5 41 4M39 73q21-5 41 4M39 87q21-5 41 4M108 63q20-9 42-4M108 77q20-9 42-4M108 91q20-9 42-4' fill='none' stroke='%23a7c6e3' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='m110 92 4-16 48-47 11 11-48 47z' fill='%232c69a6'/%3E%3Cpath d='m110 92 4-16 11 11z' fill='%23e8b45d'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.writing-page .wp-toolbar a.wp-text-button,
+.writing-page .wp-editor-footer button.wp-text-button,
+.bh-page .bh-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 9px 15px;
+  border: 1px solid #a9cbe9;
+  border-radius: 9px;
+  background: #fff;
+  color: #184c7b;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.writing-page .wp-toolbar a.wp-text-button:hover,
+.writing-page .wp-editor-footer button.wp-text-button:hover:not(:disabled),
+.bh-page .bh-button:hover:not(:disabled) {
+  border-color: #669fd4;
+  background: #e8f4ff;
+}
+
+.writing-page .wp-timer button {
+  min-height: 44px;
+  border-color: #15599a;
+  background: #195fa5;
+  color: #fff;
+  font-weight: 700;
+}
+
+.writing-page .wp-question-panel,
+.writing-page .wp-editor-panel,
+.writing-page .wp-question-card,
+.bh-page .bh-panel {
+  background: #fff;
+  box-shadow: 0 8px 24px #163d6810;
+}
+
+.writing-page #writing-answer {
+  background: #f7fbff;
+  border-color: #b9d3e9;
+}
+
+.writing-page .wp-footer,
+.bh-page .bh-footer {
+  margin-top: 24px;
+  padding: 16px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: #102f4a;
+  color: #edf6ff;
+  line-height: 1.5;
+  text-align: center;
+}
+
+@media (max-width: 650px) {
+  .writing-page .wp-heading,
+  .bh-page .bh-hero {
+    min-height: auto;
+    padding: 20px;
+  }
+
+  .writing-page .wp-heading::after,
+  .bh-page .bh-hero::after {
+    display: none;
+  }
+}

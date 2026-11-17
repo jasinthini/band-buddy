@@ -8,10 +8,8 @@
   display: flex;
   flex-direction: column;
   background: #edf5fd;
-  color: #17365a;
-  font-family: Arial, sans-serif;
-  font-size: 15px;
-  line-height: 1.5;
+  color: #0d2848;
+  font: 16px/1.5 Arial, sans-serif;
 }
 
 .br-header {
@@ -20,111 +18,101 @@
   justify-content: space-between;
   gap: 16px;
   min-height: 76px;
-  padding: 8px clamp(20px, 5vw, 70px);
-  background: #ffffff;
+  padding: 8px clamp(18px, 6vw, 115px);
+  background: #fff;
   border-bottom: 1px solid #dce8f4;
 }
 
 .br-logo {
   display: block;
-  width: 145px;
-  height: 60px;
+  width: 120px;
+  height: 56px;
   object-fit: contain;
 }
 
 .br-back {
-  color: #244f76;
-  font-size: 14px;
-  font-weight: 600;
+  color: #0d2848;
+  font-weight: 700;
   text-decoration: none;
+}
+
+.br-back:hover {
+  text-decoration: underline;
 }
 
 .br-main {
   flex: 1;
-  display: flex;
-  align-items: center;
-  padding: 18px 24px;
+  display: grid;
+  place-items: center;
+  padding: clamp(20px, 2.5vw, 38px) clamp(16px, 4vw, 64px);
+  background: #dff0fc url('/images/register-background.png') center / cover no-repeat;
 }
 
 .br-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: center;
-  gap: clamp(30px, 5vw, 70px);
-  width: min(1080px, 100%);
-  margin: 0 auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(100%, 1250px);
+  overflow: hidden;
+  border: 1px solid #b9d7ef;
+  border-radius: 30px;
+  background: #fff;
+  box-shadow: 0 18px 45px rgba(16, 54, 88, 0.14);
 }
 
 .br-form-section {
   min-width: 0;
-  padding: 0;
-}
-
-.br-eyebrow {
-  margin: 0 0 6px;
-  color: #577b9c;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
+  padding: clamp(24px, 3vw, 52px);
 }
 
 .br-form-section h1 {
-  margin: 0 0 6px;
-  color: #17365a;
-  font-size: clamp(28px, 2.5vw, 34px);
-  font-weight: 700;
-  line-height: 1.2;
+  margin: 0 0 8px;
+  color: #0d2848;
+  font: 700 clamp(32px, 3.4vw, 56px)/1.07 Georgia, serif;
 }
 
 .br-intro {
-  margin: 0 0 15px;
-  color: #526e8b;
-  font-size: 15px;
+  margin: 0 0 20px;
+  color: #375d7e;
 }
 
 .br-field {
-  margin-bottom: 11px;
+  margin-bottom: 12px;
 }
 
 .br-field label {
   display: block;
   margin-bottom: 5px;
-  color: #17365a;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .br-field input {
   display: block;
   width: 100%;
   min-width: 0;
-  min-height: 44px;
-  padding: 9px 13px;
-  border: 1px solid #cbdff0;
-  border-radius: 9px;
-  background: #f8fbff;
-  color: #17365a;
+  min-height: 46px;
+  padding: 9px 14px;
+  border: 1px solid #a7bfd8;
+  border-radius: 10px;
+  background: #fff;
+  color: #0d2848;
   font: inherit;
-  font-size: 16px;
 }
 
 .br-field input::placeholder {
-  color: #6f859a;
+  color: #56708a;
 }
 
 .br-password {
   display: flex;
-  align-items: stretch;
-  border: 1px solid #cbdff0;
-  border-radius: 9px;
-  background: #f8fbff;
-  overflow: hidden;
+  border: 1px solid #a7bfd8;
+  border-radius: 10px;
+  background: #fff;
 }
 
 .br-password input {
   flex: 1;
   border: 0;
-  border-radius: 0;
   background: transparent;
 }
 
@@ -134,37 +122,39 @@
   padding: 8px 12px;
   border: 0;
   border-left: 1px solid #d4e4f1;
-  background: #e8f2fc;
-  color: #365f83;
-  font: inherit;
-  font-size: 13px;
+  border-radius: 0 9px 9px 0;
+  background: #f4faff;
+  color: #0d2848;
+  font: 700 14px Arial, sans-serif;
   cursor: pointer;
 }
 
 .br-help {
-  margin: 4px 0 0;
-  color: #5a7690;
-  font-size: 12px;
+  display: block;
+  margin-top: 4px;
+  color: #486582;
+  font-size: 13px;
 }
 
-.br-submit {
-  display: block;
+.br-submit,
+.br-google {
   width: 100%;
-  min-height: 44px;
-  margin-top: 6px;
-  padding: 9px 18px;
-  border: 1px solid #c98ca3;
-  border-radius: 9px;
-  background: #f3d5df;
-  color: #74344e;
+  min-height: 46px;
+  padding: 10px 16px;
+  border: 1px solid #a7bfd8;
+  border-radius: 10px;
+  color: #0d2848;
   font: inherit;
-  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
 }
 
-.br-submit:hover {
-  background: #edc7d5;
+.br-submit {
+  background: linear-gradient(100deg, #e5f2ff, #b4daf4);
+}
+
+.br-submit:hover:not(:disabled) {
+  background: linear-gradient(100deg, #d9edfd, #a3d1f0);
 }
 
 .br-divider {
@@ -172,15 +162,16 @@
   align-items: center;
   gap: 14px;
   margin: 12px 0;
-  color: #66809b;
-  font-size: 13px;
+  color: #486582;
+  font-size: 14px;
 }
 
-.br-divider > span:first-child,
-.br-divider > span:last-child {
+.br-divider::before,
+.br-divider::after {
+  content: '';
   flex: 1;
   height: 1px;
-  background: #cbdcea;
+  background: #bed2e5;
 }
 
 .br-google {
@@ -188,141 +179,152 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  width: 100%;
-  min-height: 44px;
-  padding: 9px 16px;
-  border: 1px solid #bfd6ed;
-  border-radius: 9px;
-  background: #f8fbff;
-  color: #17365a;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
+  background: #fff;
 }
 
 .br-google svg {
-  width: 19px;
-  height: 19px;
   flex-shrink: 0;
 }
 
-.br-google:hover {
-  background: #e7f1fc;
+.br-google:hover:not(:disabled) {
+  background: #edf6ff;
 }
 
 .br-message {
-  margin: 10px 0 0;
+  margin: 12px 0 0;
   padding: 9px 12px;
   border-radius: 8px;
-  background: #e0edf9;
-  color: #365f83;
-  font-size: 13px;
+  background: #e8f3ff;
+  color: #244b70;
+  font-size: 14px;
   overflow-wrap: anywhere;
 }
 
 .br-login {
-  margin: 12px 0 0;
+  margin: 14px 0 0;
   text-align: center;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .br-login a {
-  color: #235f9f;
+  color: #18568d;
   font-weight: 700;
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-/* Drawing */
-
 .br-art-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
   min-width: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+  margin: 0;
+  padding: clamp(24px, 4vw, 60px);
+  background: linear-gradient(145deg, #eaf7ff, #c0e3f7);
+  text-align: center;
 }
 
 .br-illustration {
   display: block;
-  width: 100%;
-  max-width: 410px;
+  width: min(100%, 480px);
   height: auto;
-  max-height: 320px;
+  max-height: 380px;
   object-fit: contain;
-  margin: 0 auto 14px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
 }
 
-.br-art-section h2 {
-  margin: 0 0 10px;
-  color: #17365a;
-  font-size: clamp(24px, 2.3vw, 30px);
+.br-art-section figcaption {
+  max-width: 15ch;
+  color: #0d2848;
+  font: italic 700 clamp(28px, 3.1vw, 46px)/1.12 Georgia, serif;
+}
+
+.br-footer {
+  padding: 18px 16px;
+  background: #102f47;
+  color: #fff;
+  text-align: center;
   font-weight: 700;
-  line-height: 1.3;
 }
 
-.br-art-section h2 span {
-  color: #3875a9;
-}
-
-.br-art-section > p {
-  margin: 0;
-  color: #526e8b;
-  font-size: 14px;
-}
-
-.br-page button:disabled,
-.br-page input:disabled {
+.br-page :disabled {
   opacity: 0.65;
   cursor: not-allowed;
 }
 
-.br-page a:focus-visible,
-.br-page button:focus-visible,
-.br-page input:focus-visible {
-  outline: 3px solid #76a9d8;
-  outline-offset: 3px;
+.br-page :focus-visible {
+  outline: 2px solid #2469a7;
+  outline-offset: 2px;
 }
 
 .br-password:focus-within {
-  outline: 3px solid #76a9d8;
-  outline-offset: 3px;
+  outline: 2px solid #2469a7;
+  outline-offset: 2px;
 }
 
 .br-password input:focus-visible {
   outline: none;
 }
 
-/* Short laptop screens */
-
-@media (min-width: 851px) and (max-height: 740px) {
+@media (max-width: 760px) {
   .br-header {
     min-height: 66px;
-    padding-block: 5px;
   }
 
-  .br-logo {
-    width: 130px;
-    height: 54px;
+  .br-back {
+    font-size: 14px;
   }
 
   .br-main {
-    padding-block: 12px;
+    padding: 20px 16px;
+  }
+
+  .br-layout {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 500px;
+    border-radius: 22px;
+  }
+
+  .br-form-section {
+    padding: 26px 20px;
+  }
+
+  .br-art-section {
+    padding: 24px 20px;
+  }
+
+  .br-illustration {
+    max-height: 200px;
+  }
+
+  .br-footer {
+    font-size: 14px;
+  }
+}
+
+
+/* Compact Register card on desktop */
+@media (min-width: 761px) {
+  .br-main {
+    padding-block: 16px;
+  }
+
+  .br-layout {
+    max-width: 1100px;
+  }
+
+  .br-form-section {
+    padding: 24px clamp(24px, 3vw, 40px);
   }
 
   .br-form-section h1 {
-    font-size: 28px;
+    font-size: clamp(30px, 3vw, 42px);
+    margin-bottom: 5px;
   }
 
   .br-intro {
-    margin-bottom: 10px;
-    font-size: 14px;
+    margin-bottom: 12px;
   }
 
   .br-field {
@@ -330,127 +332,108 @@
   }
 
   .br-field label {
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
 
-  .br-field input {
-    min-height: 42px;
+  .br-field input,
+  .br-submit,
+  .br-google {
+    min-height: 44px;
     padding-block: 8px;
   }
 
   .br-divider {
-    margin-block: 9px;
+    margin-block: 8px;
   }
 
   .br-login {
-    margin-top: 9px;
-  }
-
-  .br-illustration {
-    max-height: 270px;
-  }
-}
-
-/* Tablet and mobile */
-
-@media (max-width: 850px) {
-  .br-main {
-    display: block;
-    padding: 24px 22px;
-  }
-
-  .br-layout {
-    grid-template-columns: 1fr;
-    max-width: 500px;
-    gap: 30px;
+    margin-top: 8px;
   }
 
   .br-art-section {
-    text-align: center;
-  }
-
-  .br-illustration {
-    max-width: 340px;
-    max-height: 280px;
-  }
-}
-
-@media (max-width: 480px) {
-  .br-header {
-    min-height: 66px;
-    padding: 6px 16px;
+    padding: 24px;
     gap: 12px;
   }
 
-  .br-logo {
-    width: 125px;
-    height: 54px;
+  .br-illustration {
+    max-height: 300px;
   }
 
-  .br-back {
-    font-size: 13px;
+  .br-art-section figcaption {
+    font-size: clamp(26px, 3vw, 38px);
   }
 
+  .br-footer {
+    padding-block: 12px;
+  }
+}
+
+/* Compact Register card on desktop */
+@media (min-width: 761px) {
   .br-main {
-    padding: 22px 18px;
+    padding-block: 10px;
+  }
+
+  .br-layout {
+    max-width: 1060px;
+  }
+
+  .br-form-section {
+    padding: 16px clamp(20px, 2.8vw, 36px);
   }
 
   .br-form-section h1 {
-    font-size: 28px;
+    font-size: clamp(28px, 2.8vw, 38px);
+    margin-bottom: 4px;
   }
 
   .br-intro {
+    margin-bottom: 8px;
     font-size: 14px;
   }
 
-  .br-art-section h2 {
-    font-size: 25px;
-  }
-}
-
-
-/* Match the Login layout while keeping Register's longer form compact. */
-.bl-page.bl-login-page.bl-register-page .bl-main {
-  padding-block: clamp(24px, 3vw, 44px);
-}
-
-.bl-page.bl-login-page.bl-register-page .bl-layout {
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-}
-
-.bl-page.bl-login-page.bl-register-page .bl-form-section {
-  padding: clamp(24px, 3vw, 44px);
-}
-
-.bl-page.bl-login-page.bl-register-page .bl-form-section h1 {
-  font-size: clamp(30px, 3.2vw, 44px);
-}
-
-.bl-page.bl-register-page .bl-register-help {
-  display: block;
-  margin-top: 4px;
-  color: var(--bl-muted);
-  font-size: 13px;
-}
-
-.bl-page.bl-login-page.bl-register-page .bl-illustration {
-  width: min(100%, 460px);
-  max-width: none;
-  height: clamp(260px, 47vh, 420px);
-  max-height: none;
-  margin: 0 auto 16px;
-}
-
-@media (max-width: 760px) {
-  .bl-page.bl-login-page.bl-register-page .bl-layout {
-    grid-template-columns: minmax(0, 1fr);
+  .br-field {
+    margin-bottom: 6px;
   }
 
-  .bl-page.bl-login-page.bl-register-page .bl-form-section {
-    padding: 26px 22px;
+  .br-field label {
+    margin-bottom: 2px;
   }
 
-  .bl-page.bl-login-page.bl-register-page .bl-illustration {
-    height: 230px;
+  .br-field input,
+  .br-submit,
+  .br-google {
+    min-height: 40px;
+    padding-block: 6px;
+  }
+
+  .br-help {
+    margin-top: 2px;
+  }
+
+  .br-divider {
+    margin-block: 5px;
+  }
+
+  .br-login {
+    margin-top: 6px;
+    font-size: 14px;
+  }
+
+  .br-art-section {
+    padding: 18px;
+    gap: 8px;
+  }
+
+  .br-illustration {
+    max-height: 260px;
+  }
+
+  .br-art-section figcaption {
+    font-size: clamp(24px, 2.6vw, 34px);
+  }
+
+  .br-footer {
+    padding-block: 10px;
   }
 }

@@ -180,12 +180,16 @@ export default function Login() {
             <img
               className="bl-illustration"
               src="/images/login-student-navy.png"
-              alt="Student in a navy blue cardigan holding a laptop"
+              alt="Student in a navy cardigan holding a laptop"
             />
             <figcaption>Your next step starts here.</figcaption>
           </figure>
         </div>
       </main>
+
+      <footer className="bl-login-footer">
+        Band Buddy · Small steps. Meaningful progress.
+      </footer>
     </div>
   );
 }

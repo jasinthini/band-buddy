@@ -1,0 +1,198 @@
+[
+  {
+    "id": "photography-workshop",
+    "title": "Booking a workshop",
+    "intro": "Maya calls to ask about a photography workshop.",
+    "dialogue": [
+      ["Maya", "Hello, I'd like to join the photography workshop. Is it still on Saturday morning?"],
+      ["Daniel", "We've moved it to Sunday because the room is needed for another event. It starts at ten thirty in the morning."],
+      ["Maya", "Is it in the main hall? That's where my last workshop was."],
+      ["Daniel", "This time, go to Room Four on the first floor. The main hall will be closed."],
+      ["Maya", "How much does it cost, and what should I bring?"],
+      ["Daniel", "It costs twelve pounds. Bring a notebook. You can borrow a camera when you arrive."]
+    ],
+    "questions": [
+      {"prompt": "Which day is the workshop?", "options": ["Friday", "Saturday", "Sunday"], "answer": "Sunday", "explanation": "Daniel says the workshop has been moved from Saturday to Sunday."},
+      {"prompt": "What time does the workshop start?", "options": ["9:30 a.m.", "10:30 a.m.", "11:30 a.m."], "answer": "10:30 a.m.", "explanation": "Daniel says it starts at ten thirty in the morning."},
+      {"prompt": "Where should Maya go?", "options": ["Room Four", "Room Two", "The main hall"], "answer": "Room Four", "explanation": "Daniel directs Maya to Room Four on the first floor."},
+      {"prompt": "How much does the workshop cost?", "options": ["£10", "£20", "£12"], "answer": "£12", "explanation": "The workshop costs twelve pounds."},
+      {"prompt": "What should Maya bring?", "options": ["A camera", "A notebook", "A laptop"], "answer": "A notebook", "explanation": "She needs a notebook. A camera is available to borrow."}
+    ]
+  },
+  {
+    "id": "lost-bag",
+    "title": "A call to lost property",
+    "intro": "A passenger calls the bus station about a bag left on a bus.",
+    "dialogue": [
+      ["Nina", "I left my bag on a bus this morning. I usually take the twenty-four, but today I took the forty-two."],
+      ["Owen", "Can you describe the bag?"],
+      ["Nina", "It's grey with a yellow strap. There's a water bottle in the side pocket and a library book inside."],
+      ["Owen", "We have a bag that matches. Collect it from the information desk. The lost property office is being painted this week."],
+      ["Nina", "Could I come at six?"],
+      ["Owen", "The desk closes at five thirty today. Please bring some identification."]
+    ],
+    "questions": [
+      {"prompt": "Which bus did Nina take today?", "options": ["Bus 24", "Bus 42", "Bus 44"], "answer": "Bus 42", "explanation": "She usually takes the 24, but today she took the 42."},
+      {"prompt": "What colour is the strap?", "options": ["Grey", "Blue", "Yellow"], "answer": "Yellow", "explanation": "The bag is grey, but its strap is yellow."},
+      {"prompt": "Where can Nina collect the bag?", "options": ["At the information desk", "At the lost property office", "At the bus stop"], "answer": "At the information desk", "explanation": "Owen sends her to the information desk because the usual office is being painted."},
+      {"prompt": "When does the desk close today?", "options": ["5:00 p.m.", "5:30 p.m.", "6:00 p.m."], "answer": "5:30 p.m.", "explanation": "Nina suggests six, but Owen says it closes at five thirty."},
+      {"prompt": "What does Nina need to bring?", "options": ["Her bus ticket", "A library card", "Identification"], "answer": "Identification", "explanation": "Owen asks Nina to bring identification."}
+    ]
+  },
+  {
+    "id": "community-garden",
+    "title": "Volunteering at a community garden",
+    "intro": "Asha asks what to expect on her first day as a garden volunteer.",
+    "dialogue": [
+      ["Asha", "I'm joining the garden volunteers on Saturday. Should I meet everyone at the main gate?"],
+      ["Leo", "Use the side entrance on Mill Road. The main gate opens later. We'll meet beside the greenhouse at nine fifteen."],
+      ["Asha", "Will we be planting vegetables?"],
+      ["Leo", "That's next week. This time we're clearing the paths. We have spare gloves, but please wear sturdy shoes."],
+      ["Asha", "Should I bring lunch?"],
+      ["Leo", "We finish at eleven thirty, so you won't need lunch. Drinking water is available, but please bring a refillable bottle."]
+    ],
+    "questions": [
+      {"prompt": "Which entrance should Asha use?", "options": ["The main gate", "The side entrance on Mill Road", "The entrance behind the greenhouse"], "answer": "The side entrance on Mill Road", "explanation": "Leo says to use Mill Road because the main gate opens later."},
+      {"prompt": "What time will the volunteers meet?", "options": ["9:00 a.m.", "9:30 a.m.", "9:15 a.m."], "answer": "9:15 a.m.", "explanation": "They will meet beside the greenhouse at nine fifteen."},
+      {"prompt": "What will volunteers do this Saturday?", "options": ["Clear the paths", "Plant vegetables", "Repair the main gate"], "answer": "Clear the paths", "explanation": "Planting is next week. This Saturday is for clearing paths."},
+      {"prompt": "What does Leo ask Asha to wear?", "options": ["A waterproof jacket", "Sturdy shoes", "Gardening gloves"], "answer": "Sturdy shoes", "explanation": "Gloves are available, but Asha should wear sturdy shoes."},
+      {"prompt": "What should Asha bring?", "options": ["Lunch", "Seeds", "A refillable bottle"], "answer": "A refillable bottle", "explanation": "Drinking water is provided, but volunteers need a refillable bottle."}
+    ]
+  },
+  {
+    "id": "cycle-rental",
+    "title": "Hiring a bicycle",
+    "intro": "A visitor plans to hire a bicycle for a ride along the river.",
+    "dialogue": [
+      ["Iris", "I'd like to hire a bicycle for Friday. Would I need it for the whole day to ride along the river?"],
+      ["Ben", "Four hours is usually enough. The half-day hire costs sixteen pounds. A full day costs twenty-eight."],
+      ["Iris", "Is a helmet included, or do I pay for one separately?"],
+      ["Ben", "The helmet is included. A basket costs two pounds extra, but most people don't need one."],
+      ["Iris", "Can I collect the bike from your shop by the bridge?"],
+      ["Ben", "That shop is being repaired. Collect it from our kiosk beside the railway station. If you book online, show us your confirmation email at the kiosk."]
+    ],
+    "questions": [
+      {"prompt": "How long is the half-day hire?", "options": ["Three hours", "Four hours", "Six hours"], "answer": "Four hours", "explanation": "Ben says the four-hour hire is the half-day option."},
+      {"prompt": "How much does a half-day hire cost?", "options": ["£16", "£18", "£28"], "answer": "£16", "explanation": "Sixteen pounds is the half-day price; twenty-eight is the full-day price."},
+      {"prompt": "What is included in the hire price?", "options": ["A basket", "A route guide", "A helmet"], "answer": "A helmet", "explanation": "The helmet is included. A basket costs extra."},
+      {"prompt": "Where should Iris collect the bicycle?", "options": ["Beside the railway station", "At the shop by the bridge", "At the riverside café"], "answer": "Beside the railway station", "explanation": "The bridge shop is under repair, so Ben directs her to the station kiosk."},
+      {"prompt": "What should online customers show at collection?", "options": ["A train ticket", "A confirmation email", "A bank statement"], "answer": "A confirmation email", "explanation": "Ben asks customers who book online to show their confirmation email."}
+    ]
+  },
+  {
+    "id": "museum-tour",
+    "title": "Changes to a museum tour",
+    "intro": "A museum guide explains changes to the afternoon tour.",
+    "dialogue": [
+      ["Guide", "Welcome to the Harbour Museum. Today's guided tour begins at two fifteen, a quarter of an hour later than advertised."],
+      ["Guide", "Please meet by the large clock in the entrance hall. The café will be busy, so don't wait there."],
+      ["Guide", "We'll begin with the model ships. The map gallery is closed, but we'll visit the old radio room instead."],
+      ["Guide", "You may take photographs in most rooms. Please put your camera away in the radio room, where some items are on loan."],
+      ["Guide", "The tour lasts about forty minutes. Afterwards, you can collect a free activity sheet from reception."]
+    ],
+    "questions": [
+      {"prompt": "When does today's tour begin?", "options": ["2:00 p.m.", "2:30 p.m.", "2:15 p.m."], "answer": "2:15 p.m.", "explanation": "The guide gives two fifteen as the revised start time."},
+      {"prompt": "Where should visitors meet?", "options": ["By the large clock", "Outside the café", "At reception"], "answer": "By the large clock", "explanation": "The meeting point is the large clock in the entrance hall."},
+      {"prompt": "Which room replaces the map gallery on the tour?", "options": ["The model ship room", "The old radio room", "The entrance hall"], "answer": "The old radio room", "explanation": "The map gallery is closed, so the group will visit the radio room instead."},
+      {"prompt": "What should visitors avoid doing in the radio room?", "options": ["Taking photographs", "Asking questions", "Reading the signs"], "answer": "Taking photographs", "explanation": "The guide asks visitors to put their cameras away in that room."},
+      {"prompt": "What can visitors collect after the tour?", "options": ["A free drink", "A postcard", "An activity sheet"], "answer": "An activity sheet", "explanation": "The free activity sheet can be collected from reception afterwards."}
+    ]
+  },
+  {
+    "id": "shared-flat",
+    "title": "Asking about a room to rent",
+    "intro": "A student calls about a room in a shared flat.",
+    "dialogue": [
+      ["Sam", "I'm calling about the room on Oak Street. Is it still available from the first of June?"],
+      ["Ruth", "The current tenant needs an extra week, so the room will be ready on the eighth of June."],
+      ["Sam", "The advert says four hundred and sixty pounds a month. Does that include electricity?"],
+      ["Ruth", "Water and internet are included. The flatmates share the electricity bill separately."],
+      ["Sam", "Is there space for my bicycle? And could I see the room tomorrow evening?"],
+      ["Ruth", "There's a locked shed at the back. I can show you the room tomorrow at six forty-five. Ring the bell marked Flat B."]
+    ],
+    "questions": [
+      {"prompt": "When will the room be ready?", "options": ["1 June", "8 June", "18 June"], "answer": "8 June", "explanation": "The current tenant needs another week, so the room will be ready on the eighth."},
+      {"prompt": "What is the monthly rent?", "options": ["£406", "£416", "£460"], "answer": "£460", "explanation": "Sam reads the advertised rent as four hundred and sixty pounds."},
+      {"prompt": "Which bill is paid separately?", "options": ["Electricity", "Water", "Internet"], "answer": "Electricity", "explanation": "Water and internet are included; flatmates share the electricity bill."},
+      {"prompt": "Where can Sam keep a bicycle?", "options": ["In the entrance hall", "In a locked shed", "On a balcony"], "answer": "In a locked shed", "explanation": "Ruth says there is a locked shed at the back."},
+      {"prompt": "What time is the viewing?", "options": ["6:15 p.m.", "6:30 p.m.", "6:45 p.m."], "answer": "6:45 p.m.", "explanation": "Ruth offers a viewing at six forty-five in the evening."}
+    ]
+  },
+  {
+    "id": "study-project",
+    "title": "Planning a student research project",
+    "intro": "Two students discuss how to collect information for a class project.",
+    "dialogue": [
+      ["Leila", "For our project on campus travel, I thought we could interview students in the library."],
+      ["Tom", "We'd miss people who leave straight after class. Let's put a short online questionnaire on the class forum instead."],
+      ["Leila", "Good idea. We can ask how they travel and how long the journey takes. Should we ask for their home addresses?"],
+      ["Tom", "No, we only need their travel time. We can also ask what would make them change how they travel."],
+      ["Leila", "I'll draft the questions by Thursday. Can you ask three classmates to try them before we post the final version?"],
+      ["Tom", "Yes. And when we present the findings, let's use a bar chart to compare the most common forms of transport."]
+    ],
+    "questions": [
+      {"prompt": "Where will the students post the questionnaire?", "options": ["On the class forum", "On the library noticeboard", "On the campus transport website"], "answer": "On the class forum", "explanation": "Tom suggests posting it on the class forum to reach students who leave after class."},
+      {"prompt": "What information do they decide to leave out?", "options": ["Journey times", "Home addresses", "Forms of transport"], "answer": "Home addresses", "explanation": "Tom says they do not need addresses because travel time is enough."},
+      {"prompt": "When will Leila draft the questions?", "options": ["By Tuesday", "By Friday", "By Thursday"], "answer": "By Thursday", "explanation": "Leila says she will draft them by Thursday."},
+      {"prompt": "How many classmates will Tom ask to test the questions?", "options": ["Three", "Four", "Five"], "answer": "Three", "explanation": "Leila asks Tom to get three classmates to try the questionnaire."},
+      {"prompt": "How will they compare forms of transport in the presentation?", "options": ["With a map", "With a bar chart", "With a timeline"], "answer": "With a bar chart", "explanation": "Tom suggests a bar chart to compare the most common ways students travel."}
+    ]
+  },
+  {
+    "id": "wetland-visit",
+    "title": "Visiting a wetland reserve",
+    "intro": "A ranger briefs visitors before a walk around a wetland reserve.",
+    "dialogue": [
+      ["Ranger", "Today we are taking the short loop because the eastern path is flooded. The loop should take about fifty minutes."],
+      ["Ranger", "At the first junction, keep left towards the wooden bridge. The right-hand path is for staff vehicles."],
+      ["Ranger", "Please speak quietly near the viewing shelter. Sudden noise may frighten the birds away before everyone has seen them."],
+      ["Ranger", "You can borrow binoculars from the visitor centre. There is no charge, but leave your name at the desk."],
+      ["Ranger", "We'll end the walk at the picnic area. If you want to return to the car park, follow the blue signs from there."]
+    ],
+    "questions": [
+      {"prompt": "Why will the group take the short loop?", "options": ["The eastern path is flooded", "The group arrived late", "The reserve closes early"], "answer": "The eastern path is flooded", "explanation": "The ranger explains that flooding has made the eastern path unavailable."},
+      {"prompt": "Which direction should visitors take at the first junction?", "options": ["Right", "Straight ahead", "Left"], "answer": "Left", "explanation": "They should keep left towards the wooden bridge."},
+      {"prompt": "Why should visitors speak quietly near the shelter?", "options": ["To hear the traffic", "To avoid frightening birds", "To let staff give instructions"], "answer": "To avoid frightening birds", "explanation": "The ranger says sudden noise may cause birds to fly away."},
+      {"prompt": "What must visitors do to borrow binoculars?", "options": ["Leave their name", "Pay a small fee", "Show a parking ticket"], "answer": "Leave their name", "explanation": "Borrowing is free, but visitors must leave their name at the desk."},
+      {"prompt": "Which signs lead back to the car park?", "options": ["Green signs", "Blue signs", "White signs"], "answer": "Blue signs", "explanation": "From the picnic area, the blue signs lead to the car park."}
+    ]
+  },
+  {
+    "id": "market-waste",
+    "title": "Reducing waste at a food market",
+    "intro": "A market manager explains the results of a small waste reduction trial.",
+    "dialogue": [
+      ["Manager", "We began by weighing the food left at the end of each market day. Bread made up the largest share, although we had expected vegetables to come first."],
+      ["Manager", "We offered vendors two options: sell surplus items at a lower price in the last hour, or set them aside for collection by a community kitchen."],
+      ["Manager", "At first, some vendors worried that shoppers would delay buying until prices fell. In practice, reduced prices applied only to items that vendors had already marked as surplus."],
+      ["Manager", "After six weeks, less food was going into the bins. The figures did not tell us whether vendors were making more money, because we had not collected sales records."],
+      ["Manager", "Next month, we will ask vendors how much time the new process takes, especially at closing time."]
+    ],
+    "questions": [
+      {"prompt": "Which food made up the largest share of the leftovers?", "options": ["Vegetables", "Bread", "Fruit"], "answer": "Bread", "explanation": "Bread was the largest share, even though the team expected vegetables to come first."},
+      {"prompt": "Who could collect surplus food from the vendors?", "options": ["A school canteen", "A supermarket", "A community kitchen"], "answer": "A community kitchen", "explanation": "The second option was to set surplus food aside for a community kitchen."},
+      {"prompt": "What were some vendors worried shoppers would do?", "options": ["Wait for lower prices", "Ask for larger portions", "Buy from a different market"], "answer": "Wait for lower prices", "explanation": "Vendors worried shoppers would delay buying until discounts began."},
+      {"prompt": "What could the team not tell from the trial?", "options": ["Whether less food was thrown away", "Whether vendors made more money", "Whether some items were marked as surplus"], "answer": "Whether vendors made more money", "explanation": "They measured waste but did not collect sales records."},
+      {"prompt": "What will the team ask vendors about next month?", "options": ["Which bread sells best", "How many people visit the market", "How much time the process takes"], "answer": "How much time the process takes", "explanation": "They want to know how much work the process adds, particularly at closing time."}
+    ]
+  },
+  {
+    "id": "city-tree-survey",
+    "title": "Measuring shade on city streets",
+    "intro": "A researcher describes how a team compared walking conditions on two streets.",
+    "dialogue": [
+      ["Researcher", "Our team wanted to know whether street trees made walking more comfortable on hot days. We chose two streets with similar building heights, but one had much more tree cover."],
+      ["Researcher", "We first planned to take readings in the morning. We moved the measurements to the afternoon because that was when residents reported the most discomfort."],
+      ["Researcher", "At each location, we measured both air temperature and the temperature of the pavement. The clearest difference between the streets was in pavement temperature."],
+      ["Researcher", "We also asked pedestrians why they chose their route. Several mentioned shade, but others said they followed the street with fewer road crossings."],
+      ["Researcher", "The survey took place in summer only. We plan to repeat it in another season before recommending where new trees should be planted."]
+    ],
+    "questions": [
+      {"prompt": "What was similar about the two streets?", "options": ["Their tree cover", "Their number of crossings", "Their building heights"], "answer": "Their building heights", "explanation": "The researcher says the buildings were similar in height, but tree cover differed."},
+      {"prompt": "Why did the team take readings in the afternoon?", "options": ["Residents reported the most discomfort then", "There were fewer pedestrians then", "The equipment was only available then"], "answer": "Residents reported the most discomfort then", "explanation": "Residents said they felt most uncomfortable in the afternoon."},
+      {"prompt": "Which measurement showed the clearest difference?", "options": ["Air temperature", "Pavement temperature", "Traffic speed"], "answer": "Pavement temperature", "explanation": "The biggest difference was in the temperature of the pavement."},
+      {"prompt": "Besides shade, what influenced some pedestrians' route choice?", "options": ["Wider footpaths", "More shops", "Fewer road crossings"], "answer": "Fewer road crossings", "explanation": "Some pedestrians preferred the route with fewer crossings."},
+      {"prompt": "What will the team do before recommending where to plant trees?", "options": ["Repeat the survey in another season", "Replace all the measuring equipment", "Remove the existing trees"], "answer": "Repeat the survey in another season", "explanation": "The first survey covered summer only, so the team wants evidence from another season."}
+    ]
+  }
+]

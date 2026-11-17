@@ -55,9 +55,7 @@ function Icon({ name, ...props }) {
       aria-hidden="true"
       {...props}
     >
-      {name === 'arrow' && (
-        <path d="M4 12h16m-6-6 6 6-6 6" />
-      )}
+      {name === 'arrow' && <path d="M4 12h16m-6-6 6 6-6 6" />}
 
       {name === 'study' && (
         <>
@@ -131,7 +129,6 @@ function Globe() {
             preserveAspectRatio="none"
           >
             <g fill="#B4D4EA">{continents}</g>
-
             <g fill="#B4D4EA" transform="translate(320 0)">
               {continents}
             </g>
@@ -178,11 +175,7 @@ export default function LandingPage() {
 
       <header className="bn-header">
         <nav className="bn-navigation" aria-label="Main navigation">
-          <a
-            className="bn-brand"
-            href="/"
-            aria-label="Band Buddy home"
-          >
+          <a className="bn-brand" href="/" aria-label="Band Buddy home">
             <img src="/images/logo.png" alt="Band Buddy" />
           </a>
 
@@ -197,10 +190,7 @@ export default function LandingPage() {
               Log in
             </a>
 
-            <a
-              className="bn-button bn-button-small"
-              href="/register"
-            >
+            <a className="bn-button bn-button-small" href="/register">
               Get started
             </a>
 
@@ -226,11 +216,9 @@ export default function LandingPage() {
             <a href="#practice" onClick={closeMenu}>
               Practice
             </a>
-
             <a href="#approach" onClick={closeMenu}>
               Our approach
             </a>
-
             <a href="#global-learning" onClick={closeMenu}>
               Global learning
             </a>
@@ -239,10 +227,7 @@ export default function LandingPage() {
       </header>
 
       <main id="bn-main">
-        <section
-          className="bn-hero"
-          aria-labelledby="bn-title"
-        >
+        <section className="bn-hero" aria-labelledby="bn-title">
           <img
             className="bn-hero-image"
             src="/images/landing-hero.png"
@@ -254,20 +239,34 @@ export default function LandingPage() {
 
           <div className="bn-shell bn-hero-inner">
             <div className="bn-hero-copy">
-              <p className="bn-eyebrow">
-                YOUR AMBITION. YOUR PACE.
-              </p>
+              <p className="bn-eyebrow">YOUR AMBITION. YOUR PACE.</p>
 
-              <h1 id="bn-title">
+              <h1
+                id="bn-title"
+                style={{
+                  fontFamily: '"Segoe UI", Arial, sans-serif',
+                  fontWeight: 800,
+                  letterSpacing: '-0.04em',
+                  marginBottom: 20,
+                }}
+              >
                 A clearer path<br />
-                to your IELTS<br />
-                goals.
+                to your<br />
+                <span style={{ color: '#9ddfff' }}>IELTS goals.</span>
               </h1>
 
               <p className="bn-hero-description">
                 Build your English confidence,<br />
                 one session at a time.
               </p>
+
+              <a
+                className="bn-button bn-hero-cta"
+                href="/register"
+                style={{ marginTop: 16, marginBottom: 0 }}
+              >
+                Create account <Icon name="arrow" />
+              </a>
             </div>
           </div>
 
@@ -280,20 +279,14 @@ export default function LandingPage() {
           aria-labelledby="bn-practice-title"
         >
           <div className="bn-shell">
-            <h2
-              className="bn-centered"
-              id="bn-practice-title"
-            >
+            <h2 className="bn-centered" id="bn-practice-title">
               Choose your next small step.
             </h2>
 
             <div className="bn-practice-layout">
               <div className="bn-skill-grid">
                 {skills.map((skill) => (
-                  <article
-                    className="bn-skill-card"
-                    key={skill.art}
-                  >
+                  <article className="bn-skill-card" key={skill.art}>
                     <span
                       className={`bn-skill-picture bn-art-${skill.art}`}
                       aria-hidden="true"
@@ -302,11 +295,8 @@ export default function LandingPage() {
                     <div className="bn-skill-copy">
                       <div className="bn-skill-heading">
                         <h3>{skill.name}</h3>
-
                         {skill.soon && (
-                          <span className="bn-soon">
-                            Coming soon
-                          </span>
+                          <span className="bn-soon">Coming soon</span>
                         )}
                       </div>
 
@@ -371,9 +361,7 @@ export default function LandingPage() {
               <ol className="bn-benefits">
                 {benefits.map((benefit, index) => (
                   <li key={benefit.title}>
-                    <span className="bn-benefit-number">
-                      {index + 1}
-                    </span>
+                    <span className="bn-benefit-number">{index + 1}</span>
 
                     <div>
                       <h3>{benefit.title}</h3>
@@ -386,19 +374,13 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section
-          className="bn-outcomes"
-          aria-labelledby="bn-outcomes-title"
-        >
+        <section className="bn-outcomes" aria-labelledby="bn-outcomes-title">
           <div className="bn-shell">
-            <h2 id="bn-outcomes-title">
-              English for what comes next.
-            </h2>
+            <h2 id="bn-outcomes-title">English for what comes next.</h2>
 
             <div className="bn-outcome-grid">
               <article>
                 <Icon name="study" />
-
                 <div>
                   <h3>Study</h3>
                   <p>
@@ -410,7 +392,6 @@ export default function LandingPage() {
 
               <article>
                 <Icon name="career" />
-
                 <div>
                   <h3>Career</h3>
                   <p>
@@ -422,7 +403,6 @@ export default function LandingPage() {
 
               <article>
                 <Icon name="people" />
-
                 <div>
                   <h3>Everyday confidence</h3>
                   <p>
@@ -462,19 +442,6 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-
-        <section className="bn-invitation">
-          <div className="bn-shell">
-            <h2>
-              Your next chapter starts<br />
-              with a little practice.
-            </h2>
-
-            <a className="bn-button" href="/register">
-              Create account <Icon name="arrow" />
-            </a>
-          </div>
-        </section>
       </main>
 
       <footer className="bn-footer">
@@ -484,10 +451,7 @@ export default function LandingPage() {
           </p>
 
           <div className="bn-footer-bottom">
-            <span>
-              © {new Date().getFullYear()} Band Buddy
-            </span>
-
+            <span>© {new Date().getFullYear()} Band Buddy</span>
             <span>
               Independent IELTS practice. AI guidance is not an
               official IELTS assessment.

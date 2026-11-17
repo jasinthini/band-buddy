@@ -1,0 +1,555 @@
+.ls-page {
+  --ls-ink: #112f50;
+  --ls-muted: #466581;
+  --ls-blue: #165dba;
+  --ls-line: #cbdff3;
+  box-sizing: border-box;
+  width: min(100%, 1320px);
+  margin-inline: auto;
+  padding: clamp(16px, 3vw, 36px);
+  color: var(--ls-ink);
+  font: 1rem/1.55 system-ui, sans-serif;
+}
+
+.ls-page *, .ls-page *::before, .ls-page *::after { box-sizing: border-box; }
+.ls-page h1, .ls-page h2, .ls-page h3 { margin: 0 0 .45em; line-height: 1.2; color: inherit; }
+.ls-page h1 { font: 700 clamp(2.2rem, 5vw, 4rem)/1.08 Georgia, serif; }
+.ls-page h2 { font-size: clamp(1.3rem, 2vw, 1.65rem); }
+.ls-page h3 { font-size: 1.15rem; }
+.ls-page p { margin: 0 0 .7em; overflow-wrap: anywhere; }
+
+.ls-page button {
+  min-height: 44px;
+  padding: .55rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--ls-blue);
+  color: white;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.ls-page button:hover:not(:disabled) { filter: brightness(.9); }
+.ls-page button:disabled { opacity: .52; cursor: not-allowed; }
+.ls-page :focus-visible { outline: 3px solid #469dff; outline-offset: 3px; }
+
+.ls-page .ls-secondary {
+  border-color: var(--ls-line);
+  background: white;
+  color: var(--ls-ink);
+}
+
+.ls-hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(250px, 1fr);
+  align-items: center;
+  gap: clamp(24px, 5vw, 72px);
+  overflow: hidden;
+  padding: clamp(24px, 5vw, 58px);
+  border-radius: 28px 28px 56px 28px;
+  background: linear-gradient(120deg, #0b2540, #164f82);
+  color: #fff;
+}
+
+.ls-background-wave {
+  position: absolute;
+  z-index: -1;
+  inset: auto auto 0 -12%;
+  width: 124%;
+  height: 80%;
+  pointer-events: none;
+  animation: ls-drift 12s ease-in-out infinite alternate;
+}
+
+.ls-background-wave path:first-child { fill: #5aafff2e; }
+.ls-background-wave path:last-child { fill: #8cccff26; }
+.ls-paused .ls-background-wave { animation-play-state: paused; }
+
+.ls-kicker {
+  font-size: .75rem;
+  font-weight: 850;
+  letter-spacing: .12em;
+  color: #2b6095;
+}
+
+.ls-hero .ls-kicker { color: #b0d9ff; }
+.ls-slide {
+  min-width: 0;
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid #b1daff55;
+  border-radius: 20px;
+  background: #0d3056cc;
+}
+
+.ls-slide-copy { min-height: 112px; animation: ls-fade .3s ease-out both; }
+.ls-slide-controls { display: flex; align-items: center; flex-wrap: wrap; }
+.ls-page .ls-dot {
+  display: grid;
+  width: 44px;
+  padding: 0;
+  place-items: center;
+  background: transparent;
+}
+
+.ls-dot span {
+  width: 10px;
+  height: 10px;
+  border: 1px solid #b8ddff;
+  border-radius: 50%;
+}
+
+.ls-dot[aria-pressed="true"] span { background: #b8ddff; }
+.ls-page .ls-pause {
+  padding-inline: 8px;
+  background: transparent;
+  color: #def0ff;
+  font-size: .8rem;
+}
+
+.ls-list-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin-top: 28px;
+}
+
+.ls-list-header p, .ls-muted { color: var(--ls-muted); font-size: .9rem; }
+
+.ls-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 24px);
+}
+
+.ls-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  padding: clamp(18px, 2.4vw, 28px);
+  border: 1px solid #24629c;
+  border-radius: 22px 22px 42px 22px;
+  background: radial-gradient(ellipse at 95% 0%, #225e97, transparent 62%), #102f50;
+  color: #fff;
+  box-shadow: 0 12px 24px #153b6322;
+}
+
+.ls-card-top {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #c4e1ff;
+  font-size: .8rem;
+  font-weight: 750;
+}
+
+.ls-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 45px;
+  height: 45px;
+  border-radius: 13px;
+  background: #deefff;
+  color: #164979;
+}
+
+.ls-icon svg { width: 25px; height: 25px; }
+
+.ls-card h3 {
+  margin-top: 8px;
+  font: 700 clamp(1.25rem, 2vw, 1.6rem)/1.2 Georgia, serif;
+}
+
+.ls-card p { color: #cce6ff; font-size: .86rem; }
+.ls-card p:last-of-type { margin-bottom: 18px; }
+
+.ls-card button {
+  align-self: stretch;
+  margin-top: auto;
+  border-radius: 999px;
+  background: #e2f1ff;
+  color: #113758;
+}
+
+.ls-waveform {
+  display: flex;
+  align-items: center;
+  gap: clamp(3px, .65vw, 7px);
+  height: 54px;
+  margin-block: 8px;
+  color: #8dccff;
+}
+
+.ls-waveform i {
+  width: 4px;
+  height: var(--height);
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.ls-waveform.ls-playing i { animation: ls-pulse .8s var(--delay) infinite alternate ease-in-out; }
+
+.ls-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  font-weight: 750;
+}
+
+.ls-exercise-title { margin: 24px 0 18px; }
+.ls-exercise-title > p:last-child { color: var(--ls-muted); }
+
+.ls-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--ls-line);
+  border-radius: 12px;
+  background: #e7f3ff;
+}
+
+.ls-toolbar [role="timer"] { font-variant-numeric: tabular-nums; }
+.ls-result { border-inline-start: 4px solid var(--ls-blue); }
+
+.ls-workspace {
+  display: grid;
+  grid-template-columns: minmax(245px, .8fr) minmax(0, 1.4fr);
+  align-items: start;
+  gap: 18px;
+}
+
+.ls-panel {
+  min-width: 0;
+  padding: clamp(16px, 2.5vw, 28px);
+  border: 1px solid var(--ls-line);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.ls-player {
+  position: sticky;
+  top: 16px;
+  background: linear-gradient(145deg, #f7fbff, #e4f1ff);
+}
+
+.ls-player .ls-icon { margin-bottom: 14px; }
+.ls-player .ls-waveform { color: #397cb6; }
+.ls-page .ls-error { margin-top: 12px; color: #982945; }
+
+.ls-transcript { margin-top: 18px; }
+.ls-transcript summary { cursor: pointer; font-weight: 750; }
+.ls-transcript p { margin-top: 9px; }
+
+.ls-question { padding: 16px 0; border-bottom: 1px solid var(--ls-line); }
+.ls-question fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+
+.ls-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 6px 12px;
+  border-radius: 9px;
+  background: #eff6fd;
+}
+
+.ls-option input { accent-color: var(--ls-blue); }
+
+.ls-text-input {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 8px 12px;
+  border: 1px solid #9ebcda;
+  border-radius: 9px;
+  color: var(--ls-ink);
+  font: inherit;
+}
+
+.ls-text-input:disabled { background: #f1f6fb; }
+.ls-submit { margin-top: 18px; }
+
+.ls-feedback {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: #fff1e7;
+}
+
+.ls-feedback.ls-correct { background: #e5f3ff; }
+.ls-feedback p { margin: .25em 0 0; }
+
+.ls-dialog {
+  width: min(440px, calc(100% - 32px));
+  padding: 24px;
+  border: 1px solid var(--ls-line);
+  border-radius: 16px;
+  color: var(--ls-ink);
+}
+
+.ls-dialog::backdrop { background: #0b234785; }
+.ls-dialog-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+
+@keyframes ls-drift {
+  from { transform: translateX(-4%) translateY(5px); }
+  to { transform: translateX(4%) translateY(-7px); }
+}
+
+@keyframes ls-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ls-pulse {
+  from { transform: scaleY(.5); }
+  to { transform: scaleY(1); }
+}
+
+@media (max-width: 1000px) {
+  .ls-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 740px) {
+  .ls-hero, .ls-workspace { grid-template-columns: minmax(0, 1fr); }
+  .ls-player { position: static; }
+}
+
+@media (max-width: 520px) {
+  .ls-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-background-wave, .ls-slide-copy, .ls-waveform.ls-playing i { animation: none; }
+}
+
+
+/* Compact Listening hero and practice cards */
+.ls-page {
+  padding: clamp(14px, 2vw, 26px);
+}
+
+.ls-page .ls-hero {
+  gap: clamp(16px, 3vw, 36px);
+  padding: clamp(18px, 3vw, 36px);
+  border-radius: 22px 22px 36px 22px;
+}
+
+.ls-page .ls-hero h1 {
+  font-size: clamp(1.85rem, 3.4vw, 2.9rem);
+  margin-bottom: .3em;
+}
+
+.ls-page .ls-hero > div:first-of-type > p:last-child {
+  margin-bottom: 0;
+  font-size: .92rem;
+}
+
+.ls-page .ls-slide {
+  padding: 14px 18px;
+  border-radius: 14px;
+}
+
+.ls-page .ls-slide-copy {
+  min-height: 0;
+}
+
+.ls-page .ls-slide h2 {
+  font-size: 1.15rem;
+}
+
+.ls-page .ls-slide-copy > p:last-child {
+  margin-bottom: 0;
+  font-size: .85rem;
+}
+
+.ls-page .ls-list-header {
+  margin-top: 18px;
+}
+
+.ls-page .ls-grid {
+  gap: clamp(12px, 1.5vw, 18px);
+}
+
+.ls-page .ls-card {
+  padding: clamp(14px, 1.7vw, 20px);
+  border-radius: 18px 18px 30px 18px;
+}
+
+.ls-page .ls-card .ls-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.ls-page .ls-card .ls-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.ls-page .ls-card .ls-waveform {
+  height: 30px;
+  margin-block: 4px;
+}
+
+.ls-page .ls-card .ls-waveform i {
+  height: calc(var(--height) * .58);
+}
+
+.ls-page .ls-card h3 {
+  margin-top: 4px;
+  font-size: clamp(1.1rem, 1.65vw, 1.38rem);
+}
+
+.ls-page .ls-card p {
+  margin-bottom: 5px;
+}
+
+.ls-page .ls-card p:last-of-type {
+  margin-bottom: 12px;
+}
+
+.ls-page .ls-card button {
+  padding-block: .4rem;
+  font-size: .86rem;
+}
+
+
+/* Navy background behind the Listening page */
+.ls-page {
+  min-height: 100vh;
+  background: #081e34;
+  box-shadow: 0 0 0 100vmax #081e34;
+  clip-path: inset(0 -100vmax);
+}
+
+.ls-page .ls-list-header h2,
+.ls-page .ls-pagination > span {
+  color: #fff;
+}
+
+.ls-page .ls-list-header p {
+  color: #c5def6;
+}
+
+
+/* Keep the navy background inside the Listening page */
+.ls-page {
+  background: #081e34;
+  box-shadow: none;
+  clip-path: none;
+  border-radius: 24px;
+}
+
+
+/* Let the shared light-blue page background show through */
+.ls-page {
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+  border-radius: 0;
+}
+
+.ls-page .ls-list-header h2,
+.ls-page .ls-pagination > span {
+  color: #102b50;
+}
+
+.ls-page .ls-list-header p {
+  color: #466383;
+}
+
+
+/* Match the Reading page palette on the Listening practice list */
+.ls-page .ls-hero,
+.ls-page .ls-card {
+  color: #102b50;
+  border: 1px solid #bdd9f4;
+}
+
+.ls-page .ls-hero {
+  background: linear-gradient(115deg, #deefff, #f4f9fe);
+}
+
+.ls-page .ls-hero h1,
+.ls-page .ls-hero h2,
+.ls-page .ls-hero h3,
+.ls-page .ls-hero p,
+.ls-page .ls-hero button {
+  color: #102b50;
+}
+
+.ls-page .ls-hero [class*="wave"] {
+  opacity: 0.2;
+}
+
+.ls-page .ls-card {
+  background: linear-gradient(145deg, #fff 38%, #e4f1fd);
+  border-radius: 30px 14px 40px 16px;
+}
+
+.ls-page .ls-card h3 {
+  color: #102b50;
+}
+
+.ls-page .ls-card p,
+.ls-page .ls-card-top > span {
+  color: #365675;
+}
+
+.ls-page .ls-card > button {
+  background: #fff;
+  border: 1px solid #bdd9f4;
+  color: #102b50;
+}
+
+.ls-page .ls-card:first-child > button[aria-label^="Start listening:"] {
+  background: #1768c9;
+  border-color: #1768c9;
+  color: #fff;
+}
+
+/* Keep white text legible if the tips panel uses its original dark fill */
+.ls-page .ls-hero [class*="tip"] {
+  color: #102b50;
+}
+
+.ls-page .ls-hero [class*="tip"]:has(button) {
+  background: #e4f1fd;
+  border-color: #bdd9f4;
+}
+
+
+/* Light blue background for the Listening tips panel */
+.ls-page .ls-hero .ls-slide {
+  background: #e4f1fd;
+  border-color: #bdd9f4;
+  color: #102b50;
+}
+
+.ls-page .ls-hero .ls-dot span {
+  background: transparent;
+  border: 1px solid #2568ab;
+}
+
+.ls-page .ls-hero .ls-dot[aria-pressed="true"] span {
+  background: #2568ab;
+}
+
+.ls-page .ls-hero .ls-pause {
+  color: #102b50;
+}

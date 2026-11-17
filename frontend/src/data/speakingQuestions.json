@@ -1,0 +1,377 @@
+{
+  "part1": {
+    "label": "Part 1",
+    "title": "Familiar topics",
+    "tip": "Answer naturally. Add a reason or a short example.",
+    "preparation_seconds": 0,
+    "practice_seconds": 300,
+    "topics": [
+      {
+        "title": "Your hometown",
+        "prompt": "What do you like most about the place where you live?",
+        "points": [
+          "Has your hometown changed in recent years?",
+          "Would you like to live there in the future?",
+          "Where would you take someone who was visiting for the first time?",
+          "Is there anything you wish your hometown had?"
+        ]
+      },
+      {
+        "title": "Your daily routine",
+        "prompt": "What do you usually do in the morning?",
+        "points": [
+          "What is your favourite time of day?",
+          "Is your routine different on weekends?",
+          "Would you like to change anything about your routine?",
+          "Do you prefer to plan your day in advance?"
+        ]
+      },
+      {
+        "title": "Learning English",
+        "prompt": "When did you start learning English?",
+        "points": [
+          "What do you enjoy about learning it?",
+          "How do you practise outside class?",
+          "Which part of learning English do you find most difficult?",
+          "When was the last time you used English outside a lesson?"
+        ]
+      },
+      {
+        "title": "Food and cooking",
+        "prompt": "Do you enjoy cooking?",
+        "points": [
+          "What kind of food do you usually eat at home?",
+          "Did you learn to cook when you were younger?",
+          "Is there a dish you would like to learn to make?",
+          "Do you prefer cooking alone or with someone else?"
+        ]
+      },
+      {
+        "title": "Public transport",
+        "prompt": "How often do you use public transport?",
+        "points": [
+          "What kind of transport do you use most often?",
+          "What do you like or dislike about it?",
+          "How could transport in your area be improved?",
+          "What do you usually do while waiting for a bus or train?"
+        ]
+      },
+      {
+        "title": "Photography",
+        "prompt": "What do you usually take photos of?",
+        "points": [
+          "Do you prefer taking photos or being in them?",
+          "How often do you look at old photos?",
+          "Do you prefer keeping photos on your phone or printing them?",
+          "When do you decide to share a photo with someone?"
+        ]
+      },
+      {
+        "title": "Quiet places",
+        "prompt": "Where do you go when you want some peace and quiet?",
+        "points": [
+          "How often do you spend time there?",
+          "What do you usually do in a quiet place?",
+          "Did you enjoy quiet places when you were younger?",
+          "Do you concentrate better in silence or with some background sound?"
+        ]
+      },
+      {
+        "title": "Learning from others",
+        "prompt": "Who do you usually ask when you want to learn how to do something?",
+        "points": [
+          "Do you prefer someone to show you an example or explain the steps?",
+          "What is something a friend has taught you?",
+          "Have you ever taught someone a skill?",
+          "Is there anything you prefer learning by yourself?"
+        ]
+      },
+      {
+        "title": "Borrowing and lending",
+        "prompt": "Do you often borrow things from friends or family?",
+        "points": [
+          "What kinds of things are you happy to lend to others?",
+          "How do you remember to return something you have borrowed?",
+          "Did you share toys or books when you were a child?",
+          "Is there anything you would rather buy than borrow?"
+        ]
+      },
+      {
+        "title": "Shopping locally",
+        "prompt": "What do you usually buy from shops near your home?",
+        "points": [
+          "Is there a local shop you visit regularly?",
+          "Do you prefer shopping at a busy time or a quiet time?",
+          "Has where you shop changed in recent years?",
+          "Do you enjoy talking to people who work in local shops?"
+        ]
+      },
+      {
+        "title": "Changing plans",
+        "prompt": "Do you usually make plans for your free time?",
+        "points": [
+          "How do you feel when a plan changes at the last minute?",
+          "What do you do when rainy weather changes your plans?",
+          "Do you prefer making plans alone or with friends?",
+          "Have you ever enjoyed a day more because you had no plan?"
+        ]
+      },
+      {
+        "title": "Useful objects",
+        "prompt": "What small object do you use almost every day?",
+        "points": [
+          "When did you start using it?",
+          "Where do you usually keep it?",
+          "Would you replace it with the same thing if you lost it?",
+          "Is there an object you use less often now than in the past?"
+        ]
+      }
+    ]
+  },
+  "part2": {
+    "label": "Part 2",
+    "title": "Long turn",
+    "tip": "Take one minute to plan. Try speaking for one to two minutes.",
+    "preparation_seconds": 60,
+    "practice_seconds": 120,
+    "topics": [
+      {
+        "title": "A place you enjoy visiting",
+        "prompt": "Describe a place you enjoy visiting in your free time.",
+        "points": [
+          "Say where the place is.",
+          "Say when you usually go there.",
+          "Describe what you do there.",
+          "Explain why you enjoy visiting this place."
+        ]
+      },
+      {
+        "title": "A skill you would like to learn",
+        "prompt": "Describe a skill you would like to learn in the future.",
+        "points": [
+          "Say what the skill is.",
+          "Explain why you want to learn it.",
+          "Describe how you would learn it.",
+          "Explain how this skill could help you."
+        ]
+      },
+      {
+        "title": "Someone who helped you",
+        "prompt": "Describe a person who helped you during a difficult time.",
+        "points": [
+          "Say who the person is.",
+          "Describe the situation.",
+          "Explain how the person helped you.",
+          "Say how you felt afterwards."
+        ]
+      },
+      {
+        "title": "A meal you remember",
+        "prompt": "Describe a meal you had that you still remember.",
+        "points": [
+          "Say when and where you had the meal.",
+          "Say who you ate with.",
+          "Describe what you ate.",
+          "Explain why you still remember the meal."
+        ]
+      },
+      {
+        "title": "A journey that did not go as planned",
+        "prompt": "Describe a journey that did not go as planned.",
+        "points": [
+          "Say where you were going.",
+          "Explain how you planned to get there.",
+          "Describe what went wrong and what you did.",
+          "Explain what you would do differently next time."
+        ]
+      },
+      {
+        "title": "A photograph that matters to you",
+        "prompt": "Describe a photograph that is important to you.",
+        "points": [
+          "Describe what the photograph shows.",
+          "Say when and where it was taken.",
+          "Explain how you got the photograph.",
+          "Say why it is important to you."
+        ]
+      },
+      {
+        "title": "A quiet place you discovered",
+        "prompt": "Describe a quiet place you found unexpectedly.",
+        "points": [
+          "Say where the place is.",
+          "Explain how you found it.",
+          "Describe what you noticed when you arrived.",
+          "Explain whether you would visit it again."
+        ]
+      },
+      {
+        "title": "A useful piece of advice",
+        "prompt": "Describe a piece of advice that changed how you did something.",
+        "points": [
+          "Say who gave you the advice.",
+          "Explain what you were trying to do.",
+          "Describe how you used the advice.",
+          "Explain why you would or would not pass it on."
+        ]
+      },
+      {
+        "title": "Something you borrowed",
+        "prompt": "Describe something you borrowed that helped you complete a task.",
+        "points": [
+          "Say what you borrowed.",
+          "Explain who lent it to you.",
+          "Describe how you used it.",
+          "Explain what you would have done without it."
+        ]
+      },
+      {
+        "title": "A shop you would recommend",
+        "prompt": "Describe a local shop you would recommend to someone.",
+        "points": [
+          "Say where the shop is.",
+          "Describe what it sells.",
+          "Explain what happened on one of your visits.",
+          "Say who you would recommend it to and why."
+        ]
+      },
+      {
+        "title": "A plan you changed for the better",
+        "prompt": "Describe a time when changing your plans led to a better result.",
+        "points": [
+          "Say what you originally planned.",
+          "Explain why you decided to change it.",
+          "Describe what you did instead.",
+          "Explain what you learned from the experience."
+        ]
+      },
+      {
+        "title": "Something you repaired",
+        "prompt": "Describe an object you repaired or helped someone repair.",
+        "points": [
+          "Say what the object was.",
+          "Explain what went wrong with it.",
+          "Describe what you or someone else did to fix it.",
+          "Explain why you decided to repair it."
+        ]
+      }
+    ]
+  },
+  "part3": {
+    "label": "Part 3",
+    "title": "Discussion",
+    "tip": "Explain your views and support them with reasons or examples.",
+    "preparation_seconds": 0,
+    "practice_seconds": 300,
+    "topics": [
+      {
+        "title": "Cities and communities",
+        "prompt": "What makes a neighbourhood a good place to live?",
+        "points": [
+          "Why do many people move to cities?",
+          "What public spaces help people get to know their neighbours?",
+          "How can cities make public spaces accessible to everyone?"
+        ]
+      },
+      {
+        "title": "Technology and learning",
+        "prompt": "How has technology changed the way people learn new skills?",
+        "points": [
+          "Which skills are difficult to learn entirely online?",
+          "How can adults make time to learn while working?",
+          "What can a teacher offer that a video lesson cannot?"
+        ]
+      },
+      {
+        "title": "Work and personal time",
+        "prompt": "How much responsibility should employers have for workers’ personal well-being?",
+        "points": [
+          "Why do some people work very long hours?",
+          "How can employers help workers balance their jobs and personal lives?",
+          "Do flexible hours benefit all workers equally?"
+        ]
+      },
+      {
+        "title": "Food and traditions",
+        "prompt": "Why are certain meals important to a community's identity?",
+        "points": [
+          "How have family eating habits changed over time?",
+          "Why do some traditional dishes become less common?",
+          "What can schools or communities do to keep local food traditions alive?"
+        ]
+      },
+      {
+        "title": "Transport and travel",
+        "prompt": "What makes people choose a private vehicle over public transport?",
+        "points": [
+          "Should cities spend more on public transport or on roads?",
+          "How can towns with fewer passengers provide reliable transport?",
+          "How might travel habits change in the future?"
+        ]
+      },
+      {
+        "title": "Photographs and memories",
+        "prompt": "How has smartphone photography changed the way people remember events?",
+        "points": [
+          "Why might people remember an event differently after seeing photos of it?",
+          "What should people consider before sharing photos of others online?",
+          "How can photographs help younger generations understand the past?"
+        ]
+      },
+      {
+        "title": "Quiet spaces in public life",
+        "prompt": "Why might people need quiet spaces in busy towns and cities?",
+        "points": [
+          "How can libraries serve people who want silence and people who want to work together?",
+          "Should parks include areas where organised activities are limited?",
+          "How could town planners make quiet spaces available to people in crowded neighbourhoods?"
+        ]
+      },
+      {
+        "title": "Advice and decision-making",
+        "prompt": "Why do people sometimes ignore good advice?",
+        "points": [
+          "When is advice from someone with a similar experience especially helpful?",
+          "How can young people decide which advice online to trust?",
+          "Should schools teach students how to ask for and respond to advice?"
+        ]
+      },
+      {
+        "title": "Sharing instead of buying",
+        "prompt": "When does borrowing something make more sense than owning it?",
+        "points": [
+          "Why might neighbours hesitate to share tools or equipment?",
+          "What rules would help a community lending service work well?",
+          "Could borrowing become more common if people had less space at home?"
+        ]
+      },
+      {
+        "title": "Local shops and online shopping",
+        "prompt": "What can small shops offer that large online stores cannot?",
+        "points": [
+          "Why do some people still prefer to shop in person even when prices are higher?",
+          "How can small businesses use online services without losing their local identity?",
+          "What happens to a neighbourhood when many of its shops close?"
+        ]
+      },
+      {
+        "title": "Planning and adaptability",
+        "prompt": "Why do some people cope better with unexpected changes than others?",
+        "points": [
+          "When can a detailed plan make it harder to respond to a change?",
+          "How can group projects teach students to adapt when plans go wrong?",
+          "Should organisations reward people for sticking to a plan or for finding a better approach?"
+        ]
+      },
+      {
+        "title": "Repairing and replacing",
+        "prompt": "Why do people sometimes replace items that could still be repaired?",
+        "points": [
+          "Should manufacturers make spare parts available for longer?",
+          "What could encourage people to learn basic repair skills?",
+          "Who should pay when an item is difficult to repair because of the way it was designed?"
+        ]
+      }
+    ]
+  }
+}

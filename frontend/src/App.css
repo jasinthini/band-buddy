@@ -1038,3 +1038,59 @@
     transform: none;
   }
 }
+
+
+
+
+
+
+
+/* Band Buddy practice pages — same navbar */
+:is(.wc-header, .wc-speaking-header, .wp-header, .sp-header, .rp-practice-header) {
+  box-sizing: border-box;
+  height: 64px !important;
+  min-height: 64px !important;
+  padding-block: 0 !important;
+  background: #e4f0fc !important;
+  border-bottom: 1px solid #cbddef !important;
+}
+
+:is(.wc-header, .wc-speaking-header, .wp-header, .sp-header, .rp-practice-header) a {
+  color: #123b66 !important;
+}
+
+:is(.wc-header, .wc-speaking-header, .wp-header, .sp-header, .rp-practice-header) img {
+  width: auto !important;
+  height: auto !important;
+  max-height: 44px !important;
+  mix-blend-mode: multiply;
+}
+
+.sp-header .sp-navigation {
+  height: 100%;
+  min-height: 0 !important;
+  padding-block: 0 !important;
+}
+
+/* Band Buddy practice pages — same footer */
+:is(.wc-footer, .wp-footer, .sp-footer, .rp-footer, .rp-practice-footer, .rp-page footer) {
+  background: #102b50 !important;
+  color: white !important;
+}
+
+:is(.wc-footer, .wp-footer, .sp-footer, .rp-footer, .rp-practice-footer, .rp-page footer)
+:is(p, span, small, a) {
+  color: inherit !important;
+}
+
+
+/* Restore the original blue logo on the Writing navbar */
+:is(.wc-header, .wc-speaking-header) img {
+  filter: none !important;
+  opacity: 1 !important;
+  width: 112px !important;
+  height: auto !important;
+  max-height: 48px !important;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}

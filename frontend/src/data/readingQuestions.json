@@ -1,0 +1,246 @@
+[
+  {
+    "id": "community-library",
+    "title": "A new chapter for a community library",
+    "paragraphs": [
+      "When the fictional town of Willow Bay reviewed its library service, staff noticed that many residents wanted more than a place to borrow books. Students needed quiet study areas, while older residents asked for help using online services. The library team decided to redesign the building around these needs.",
+      "The redesigned library opened in September. Its first floor became a quiet study space with individual desks. The ground floor remained a place for borrowing books and meeting other readers. Staff introduced free digital skills sessions every Wednesday afternoon. Residents could learn how to send emails, complete online forms and use the library catalogue.",
+      "Not every change required expensive equipment. Volunteers created a book exchange shelf near the entrance. Readers could leave a book they no longer needed and take another one home. The shelf operated separately from the main borrowing system, so readers did not need a library card to use it.",
+      "After six months, staff found that visits had increased. However, they did not measure success by visitor numbers alone. They also collected comments from residents. Several people said that the digital skills sessions had helped them become more independent. The team planned to keep asking residents for ideas before making further changes."
+    ],
+    "questions": [
+      {
+        "prompt": "Why did the library team redesign the building?",
+        "options": ["To sell more books", "To respond to residents’ needs", "To reduce its opening hours"],
+        "answer": "To respond to residents’ needs",
+        "explanation": "Paragraph A explains that students needed quiet study space and older residents wanted help with online services."
+      },
+      {
+        "prompt": "Use ONE WORD: Digital skills sessions took place every ______ afternoon.",
+        "answer": "Wednesday",
+        "explanation": "Paragraph B says the sessions took place every Wednesday afternoon."
+      },
+      {
+        "prompt": "Readers needed a library card to use the book exchange shelf.",
+        "options": ["True", "False", "Not given"],
+        "answer": "False",
+        "explanation": "Paragraph C says readers did not need a library card."
+      },
+      {
+        "prompt": "The library employed five additional members of staff.",
+        "options": ["True", "False", "Not given"],
+        "answer": "Not given",
+        "explanation": "The passage does not say whether the library hired more staff."
+      },
+      {
+        "prompt": "How did staff evaluate the redesigned library?",
+        "options": ["Only by counting visitors", "Only by counting borrowed books", "By looking at visits and residents’ comments"],
+        "answer": "By looking at visits and residents’ comments",
+        "explanation": "Paragraph D mentions both visitor numbers and residents’ comments."
+      }
+    ]
+  },
+  {
+    "id": "workplace-garden",
+    "title": "The garden above the office",
+    "paragraphs": [
+      "At the fictional company Northbridge Design, an unused roof terrace became the focus of a staff project. Employees suggested turning it into a small garden where they could spend part of their lunch break. The management team agreed to a six-month trial.",
+      "Before work began, a building specialist checked the terrace. The project team then chose lightweight containers rather than deep planting beds. They planted herbs and small flowering plants. A rainwater tank supplied some of the water, although staff still used tap water during dry periods.",
+      "Participation was voluntary. A group of twelve employees shared the gardening tasks, but all staff could visit the terrace. No one was expected to work in the garden during their lunch break. People could simply sit there, read or talk with colleagues.",
+      "At the end of the trial, the company asked staff for feedback. Many visitors described the terrace as a pleasant place to take a break. The company did not measure changes in productivity, so the project team avoided claiming that the garden improved work performance. Instead, they recommended keeping the garden because staff valued the space."
+    ],
+    "questions": [
+      {
+        "prompt": "What was the original purpose of the garden project?",
+        "options": ["To create a place for staff breaks", "To grow food for sale", "To replace the office meeting rooms"],
+        "answer": "To create a place for staff breaks",
+        "explanation": "Paragraph A says employees wanted a place to spend part of their lunch break."
+      },
+      {
+        "prompt": "Use ONE WORD: The team chose lightweight ______ for the plants.",
+        "answer": "containers",
+        "explanation": "Paragraph B says the team chose lightweight containers."
+      },
+      {
+        "prompt": "Only the twelve gardening volunteers could visit the terrace.",
+        "options": ["True", "False", "Not given"],
+        "answer": "False",
+        "explanation": "Paragraph C says all staff could visit the terrace."
+      },
+      {
+        "prompt": "The company measured whether staff became more productive.",
+        "options": ["True", "False", "Not given"],
+        "answer": "False",
+        "explanation": "Paragraph D explicitly says the company did not measure changes in productivity."
+      },
+      {
+        "prompt": "The terrace was open to the public at weekends.",
+        "options": ["True", "False", "Not given"],
+        "answer": "Not given",
+        "explanation": "The passage discusses staff access. It does not mention public access or weekend opening."
+      }
+    ]
+  },
+  {
+    "id": "repair-cafe",
+    "title": "A second chance for broken things",
+    "paragraphs": [
+      "In the fictional town of Brookmere, a group of residents set up a monthly repair café. People could bring broken household items to the community hall and work alongside volunteers to fix them. The organisers wanted residents to learn basic repair skills and keep usable objects out of the rubbish. They made clear that the café was a learning space and that some items would go home still broken.",
+      "The first session attracted more visitors than expected. Most brought clothing with damaged zips or small appliances that had stopped working. A volunteer at the entrance recorded each item and directed its owner to a suitable table. When no one had the expertise to repair an item safely, the volunteer suggested a local professional instead.",
+      "After three months, the organisers noticed that some visitors were coming back with tools of their own. One participant who had originally brought a torn jacket returned to show another visitor how to sew on a button. These exchanges mattered to the organisers because they showed that people were beginning to share what they had learned.",
+      "The café was free to attend, and visitors could make an optional donation. The money covered small supplies such as thread and screws. A local shop offered to lend equipment, but the passage of a proposal to hold extra sessions depended on whether enough volunteers were available. The organisers decided to keep the monthly schedule while they recruited more helpers."
+    ],
+    "questions": [
+      {
+        "prompt": "What was one of the main aims of the repair café?",
+        "options": ["To sell second-hand appliances", "To teach residents basic repair skills", "To train professional electricians"],
+        "answer": "To teach residents basic repair skills",
+        "explanation": "Paragraph A says the organisers wanted residents to learn basic repair skills."
+      },
+      {
+        "prompt": "When volunteers could not repair an item safely, they recommended a local professional.",
+        "options": ["True", "False", "Not given"],
+        "answer": "True",
+        "explanation": "Paragraph B says a volunteer suggested a local professional when the café lacked the expertise to repair an item safely."
+      },
+      {
+        "prompt": "The first repair café was advertised on local radio.",
+        "options": ["True", "False", "Not given"],
+        "answer": "Not given",
+        "explanation": "Paragraph B describes the turnout, but the passage does not say how the first session was advertised."
+      },
+      {
+        "prompt": "Use ONE WORD: Donations paid for small supplies such as thread and ______.",
+        "answer": "screws",
+        "explanation": "Paragraph D names thread and screws as examples of supplies paid for with donations."
+      },
+      {
+        "prompt": "Why did the organisers keep the monthly schedule?",
+        "options": ["The hall had closed for repairs", "They needed more volunteers before adding sessions", "Visitors had stopped bringing broken items"],
+        "answer": "They needed more volunteers before adding sessions",
+        "explanation": "Paragraph D says extra sessions depended on volunteer availability. The organisers kept the monthly schedule while recruiting more helpers."
+      }
+    ]
+  }
+,
+  {
+    "id": "night-bus",
+    "title": "A bus for late-shift workers",
+    "paragraphs": [
+      "In the fictional town of Bellford, the last bus used to leave the centre at nine in the evening. This caused difficulties for restaurant and hospital staff whose shifts finished later. The council introduced a trial service after local employers showed how many workers had no convenient way to get home.",
+      "The new bus left the town centre at half past eleven on Fridays and Saturdays. It followed the daytime route but added a stop beside the hospital entrance. Passengers paid the same fare as they did during the day. Drivers counted passengers at each stop, but they did not collect passengers' names.",
+      "After eight weeks, the council discovered that the bus was busiest on Saturdays. Rather than extending it to every night immediately, it kept the original timetable for another month. It also asked workers on other shifts when they would be most likely to use the service."
+    ],
+    "questions": [
+      {
+        "prompt": "Who was the trial bus mainly designed to help?",
+        "options": ["Workers finishing late", "Tourists visiting the town", "Students travelling to school"],
+        "answer": "Workers finishing late",
+        "explanation": "Paragraph A explains that restaurant and hospital staff finished work after the last bus."
+      },
+      {
+        "prompt": "Use ONE WORD: An extra stop was added beside the hospital ______.",
+        "answer": "entrance",
+        "explanation": "Paragraph B says the extra stop was beside the hospital entrance."
+      },
+      {
+        "prompt": "The trial bus cost more than the daytime bus.",
+        "options": ["True", "False", "Not given"],
+        "answer": "False",
+        "explanation": "Paragraph B says that the fare was the same as during the day."
+      },
+      {
+        "prompt": "The bus had enough space for thirty passengers.",
+        "options": ["True", "False", "Not given"],
+        "answer": "Not given",
+        "explanation": "The passage says drivers counted passengers, but does not give the capacity of the bus."
+      },
+      {
+        "prompt": "What did the council do after eight weeks?",
+        "options": ["It ended the trial immediately", "It added a bus every night", "It kept the existing timetable for another month"],
+        "answer": "It kept the existing timetable for another month",
+        "explanation": "Paragraph C says the council kept the original timetable for another month."
+      }
+    ]
+  },
+  {
+    "id": "school-water-audit",
+    "title": "What a school learned about wasting water",
+    "paragraphs": [
+      "At the fictional Cedar Hill School, students expected that the kitchen used more water than any other part of the building. Their science teacher asked them to investigate before proposing changes. With help from the caretaker, they read the water meter before the school opened and again after lessons ended.",
+      "The most useful reading came on a Sunday. Although the building was empty, the meter showed that water was still being used. The caretaker discovered a leaking pipe beneath the sports hall and arranged a repair. The students' original guess about the kitchen had distracted them from a problem they could not see.",
+      "The following month, the school used less water. The students put a simple chart near the entrance so that visitors could see the difference. They also created a form for reporting dripping taps. The head teacher asked next year's science class to repeat the measurements."
+    ],
+    "questions": [
+      {
+        "prompt": "Why did the teacher ask the students to investigate?",
+        "options": ["To collect evidence before suggesting changes", "To decide whether to close the kitchen", "To compare the school with other schools"],
+        "answer": "To collect evidence before suggesting changes",
+        "explanation": "Paragraph A says the teacher asked the class to investigate before proposing changes."
+      },
+      {
+        "prompt": "The school building was occupied when the Sunday reading was taken.",
+        "options": ["True", "False", "Not given"],
+        "answer": "False",
+        "explanation": "Paragraph B says the building was empty on Sunday."
+      },
+      {
+        "prompt": "Use ONE WORD: The caretaker found a leaking ______ beneath the sports hall.",
+        "answer": "pipe",
+        "explanation": "Paragraph B identifies a leaking pipe beneath the sports hall."
+      },
+      {
+        "prompt": "The repair was paid for by the local council.",
+        "options": ["True", "False", "Not given"],
+        "answer": "Not given",
+        "explanation": "The passage says the caretaker arranged the repair, but does not say who paid for it."
+      },
+      {
+        "prompt": "How did the students show visitors the change in water use?",
+        "options": ["They gave a presentation", "They displayed a chart", "They sent an email"],
+        "answer": "They displayed a chart",
+        "explanation": "Paragraph C says the students put a chart near the entrance."
+      }
+    ]
+  },
+  {
+    "id": "market-language-club",
+    "title": "A language club at the market",
+    "paragraphs": [
+      "The fictional town of Fernwick had an evening language class, but several learners could not attend because they worked at night. A tutor began offering short conversation sessions at the Saturday market instead. The aim was to let learners practise everyday exchanges in the places where they would actually use them.",
+      "In the first session, pairs of learners walked around the market and asked stallholders about prices and opening times. Stallholders agreed to speak slowly if asked, but they did not follow a script. Some learners found this harder than a classroom exercise because the answers were less predictable.",
+      "By the fourth week, the tutor noticed that learners were asking more follow-up questions. The group started keeping a notebook of useful phrases that they heard. The tutor did not give a formal test, so she could not say whether scores would have improved. She did, however, report that learners needed fewer reminders to start a conversation."
+    ],
+    "questions": [
+      {
+        "prompt": "Why did the tutor offer sessions at the market?",
+        "options": ["Some learners could not attend the evening class", "The market needed more sellers", "Learners wanted to study written grammar"],
+        "answer": "Some learners could not attend the evening class",
+        "explanation": "Paragraph A says some learners worked at night and could not attend the evening class."
+      },
+      {
+        "prompt": "The stallholders were given a script to follow.",
+        "options": ["True", "False", "Not given"],
+        "answer": "False",
+        "explanation": "Paragraph B explicitly says the stallholders did not follow a script."
+      },
+      {
+        "prompt": "Use ONE WORD: Learners recorded useful phrases in a ______.",
+        "answer": "notebook",
+        "explanation": "Paragraph C says the group kept a notebook of useful phrases."
+      },
+      {
+        "prompt": "Most learners travelled to the market by bus.",
+        "options": ["True", "False", "Not given"],
+        "answer": "Not given",
+        "explanation": "The passage does not say how learners travelled to the market."
+      },
+      {
+        "prompt": "What change did the tutor report?",
+        "options": ["Learners received higher test scores", "Learners needed fewer reminders to start talking", "Learners stopped asking follow-up questions"],
+        "answer": "Learners needed fewer reminders to start talking",
+        "explanation": "Paragraph C reports that learners needed fewer reminders to start a conversation. There was no formal test."
+      }
+    ]
+  }
+]

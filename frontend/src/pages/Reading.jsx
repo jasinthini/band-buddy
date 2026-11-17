@@ -1,134 +1,736 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 import { savePracticeAttempt } from '../services/practiceHistory';
+import { LEVELS, SETS, TYPES } from '../data/readingSets';
 import './Reading.css';
 
-const TRUE_FALSE = ['True', 'False', 'Not given'];
-
-const PASSAGES = [
-  {
-    id: 'community-library',
-    title: 'A new chapter for a community library',
-    paragraphs: [
-      'When the fictional town of Willow Bay reviewed its library service, staff noticed that many residents wanted more than a place to borrow books. Students needed quiet study areas, while older residents asked for help using online services. The library team decided to redesign the building around these needs.',
-      'The redesigned library opened in September. Its first floor became a quiet study space with individual desks. The ground floor remained a place for borrowing books and meeting other readers. Staff introduced free digital skills sessions every Wednesday afternoon. Residents could learn how to send emails, complete online forms and use the library catalogue.',
-      'Not every change required expensive equipment. Volunteers created a book exchange shelf near the entrance. Readers could leave a book they no longer needed and take another one home. The shelf operated separately from the main borrowing system, so readers did not need a library card to use it.',
-      'After six months, staff found that visits had increased. However, they did not measure success by visitor numbers alone. They also collected comments from residents. Several people said that the digital skills sessions had helped them become more independent. The team planned to keep asking residents for ideas before making further changes.',
-    ],
-    questions: [
-      {
-        prompt: 'Why did the library team redesign the building?',
-        options: ['To sell more books', 'To respond to residents’ needs', 'To reduce its opening hours'],
-        answer: 'To respond to residents’ needs',
-        explanation: 'Paragraph A describes the needs of students and older residents.',
-      },
-      {
-        prompt: 'Use ONE WORD: Digital skills sessions took place every ______ afternoon.',
-        answer: 'Wednesday',
-        explanation: 'Paragraph B says that the sessions took place every Wednesday afternoon.',
-      },
-      {
-        prompt: 'Readers needed a library card to use the book exchange shelf.',
-        options: TRUE_FALSE,
-        answer: 'False',
-        explanation: 'Paragraph C says that readers did not need a library card.',
-      },
-      {
-        prompt: 'The library employed five additional members of staff.',
-        options: TRUE_FALSE,
-        answer: 'Not given',
-        explanation: 'The passage does not say whether the library hired more staff.',
-      },
-      {
-        prompt: 'How did staff evaluate the redesigned library?',
-        options: [
-          'Only by counting visitors',
-          'Only by counting borrowed books',
-          'By looking at visits and residents’ comments',
-        ],
-        answer: 'By looking at visits and residents’ comments',
-        explanation: 'Paragraph D mentions both visitor numbers and residents’ comments.',
-      },
-    ],
-  },
-  {
-    id: 'workplace-garden',
-    title: 'The garden above the office',
-    paragraphs: [
-      'At the fictional company Northbridge Design, an unused roof terrace became the focus of a staff project. Employees suggested turning it into a small garden where they could spend part of their lunch break. The management team agreed to a six-month trial.',
-      'Before work began, a building specialist checked the terrace. The project team then chose lightweight containers rather than deep planting beds. They planted herbs and small flowering plants. A rainwater tank supplied some of the water, although staff still used tap water during dry periods.',
-      'Participation was voluntary. A group of twelve employees shared the gardening tasks, but all staff could visit the terrace. No one was expected to work in the garden during their lunch break. People could simply sit there, read or talk with colleagues.',
-      'At the end of the trial, the company asked staff for feedback. Many visitors described the terrace as a pleasant place to take a break. The company did not measure changes in productivity, so the project team avoided claiming that the garden improved work performance. Instead, they recommended keeping the garden because staff valued the space.',
-    ],
-    questions: [
-      {
-        prompt: 'What was the original purpose of the garden project?',
-        options: [
-          'To create a place for staff breaks',
-          'To grow food for sale',
-          'To replace the office meeting rooms',
-        ],
-        answer: 'To create a place for staff breaks',
-        explanation: 'Paragraph A says employees wanted a place to spend part of their lunch break.',
-      },
-      {
-        prompt: 'Use ONE WORD: The team chose lightweight ______ for the plants.',
-        answer: 'containers',
-        explanation: 'Paragraph B says the team chose lightweight containers.',
-      },
-      {
-        prompt: 'Only the twelve gardening volunteers could visit the terrace.',
-        options: TRUE_FALSE,
-        answer: 'False',
-        explanation: 'Paragraph C says all staff could visit the terrace.',
-      },
-      {
-        prompt: 'The company measured whether staff became more productive.',
-        options: TRUE_FALSE,
-        answer: 'False',
-        explanation: 'Paragraph D says the company did not measure changes in productivity.',
-      },
-      {
-        prompt: 'The terrace was open to the public at weekends.',
-        options: TRUE_FALSE,
-        answer: 'Not given',
-        explanation: 'The passage does not mention public access or weekend opening.',
-      },
-    ],
-  },
-];
+const PAGE_SIZE = 6;
 
 function normalise(value = '') {
-  return value.trim().replace(/\s+/g, ' ').toLowerCase();
+  return String(value)
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[’‘]/g, "'")
+    .replace(/[.,!?;:]+$/g, '')
+    .trim()
+    .replace(/\s+/g, ' ');
 }
 
-function formatClock(seconds) {
+function withinLimit(question, value) {
+  if (question.options) return true;
+  return (normalise(value).match(/\S+/g)?.length ?? 0) <= (question.limit ?? 1);
+}
+
+function correct(question, value) {
+  return (
+    withinLimit(question, value) &&
+    [question.answer, ...(question.acceptedAnswers ?? [])].some(
+      (answer) => normalise(answer) === normalise(value),
+    )
+  );
+}
+
+function clock(seconds) {
   return [Math.floor(seconds / 60), seconds % 60]
-    .map((part) => String(part).padStart(2, '0'))
+    .map((value) => String(value).padStart(2, '0'))
     .join(':');
+}
+
+function tokens(text) {
+  return text.match(/[A-Za-z]+(?:['’][A-Za-z]+)*/g) ?? [];
+}
+
+function missedWords(sentence, transcript) {
+  const expected = tokens(sentence);
+  const heard = tokens(transcript).map(normalise);
+  const grid = Array.from(
+    { length: expected.length + 1 },
+    () => new Uint16Array(heard.length + 1),
+  );
+
+  for (let i = expected.length - 1; i >= 0; i -= 1) {
+    for (let j = heard.length - 1; j >= 0; j -= 1) {
+      grid[i][j] =
+        normalise(expected[i]) === heard[j]
+          ? grid[i + 1][j + 1] + 1
+          : Math.max(grid[i + 1][j], grid[i][j + 1]);
+    }
+  }
+
+  const missing = [];
+  let i = 0;
+  let j = 0;
+
+  while (i < expected.length) {
+    if (j < heard.length && normalise(expected[i]) === heard[j]) {
+      i += 1;
+      j += 1;
+    } else if (j < heard.length && grid[i][j + 1] >= grid[i + 1][j]) {
+      j += 1;
+    } else {
+      missing.push(expected[i]);
+      i += 1;
+    }
+  }
+
+  return [...new Map(missing.map((word) => [normalise(word), word])).values()]
+    .slice(0, 3);
+}
+
+function QuickRead({ passage }) {
+  const sentences = passage.paragraphs
+    .flatMap(
+      (paragraph) => paragraph.match(/[^.!?]+[.!?]+|[^.!?]+$/g) ?? [paragraph],
+    )
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+  const prompts = [...new Set(sentences)].slice(0, 3);
+
+  const [index, setIndex] = useState(0);
+  const [phase, setPhase] = useState('idle');
+  const [clip, setClip] = useState(null);
+  const [transcript, setTranscript] = useState('');
+  const [error, setError] = useState('');
+  const [remaining, setRemaining] = useState(20);
+
+  const session = useRef(null);
+  const audioUrl = useRef('');
+  const pending = useRef(null);
+  const mounted = useRef(false);
+  const text = prompts[index] ?? '';
+
+  useEffect(() => {
+    mounted.current = true;
+
+    return () => {
+      mounted.current = false;
+      pending.current?.abort();
+
+      const current = session.current;
+      session.current = null;
+
+      if (current) {
+        clearInterval(current.tick);
+
+        if (current.recorder?.state === 'recording') {
+          current.recorder.stop();
+        }
+
+        current.stream?.getTracks().forEach((track) => track.stop());
+      }
+
+      if (audioUrl.current) URL.revokeObjectURL(audioUrl.current);
+      window.speechSynthesis?.cancel();
+    };
+  }, []);
+
+  function listen(value, rate = 0.85) {
+    const player = window.speechSynthesis;
+
+    if (!player || typeof SpeechSynthesisUtterance === 'undefined') {
+      setError('Sample audio is unavailable in this browser.');
+      return;
+    }
+
+    player.cancel();
+    setError('');
+
+    const lines = Array.isArray(value) ? value : [value];
+
+    for (const line of lines) {
+      if (!line?.trim()) continue;
+
+      const speech = new SpeechSynthesisUtterance(line.trim());
+      speech.lang = 'en-GB';
+      speech.rate = rate;
+      player.speak(speech);
+    }
+  }
+
+  function clearClip() {
+    if (audioUrl.current) URL.revokeObjectURL(audioUrl.current);
+
+    audioUrl.current = '';
+    setClip(null);
+    setTranscript('');
+    setError('');
+    setRemaining(20);
+  }
+
+  function goToSentence(nextIndex) {
+    window.speechSynthesis?.cancel();
+    clearClip();
+    setIndex(nextIndex);
+  }
+
+  async function record() {
+    if (session.current || pending.current) return;
+
+    if (
+      !navigator.mediaDevices?.getUserMedia ||
+      typeof MediaRecorder === 'undefined'
+    ) {
+      setError('Microphone recording needs a supported browser on localhost or HTTPS.');
+      return;
+    }
+
+    window.speechSynthesis?.cancel();
+    clearClip();
+
+    const current = {};
+    session.current = current;
+    setPhase('requesting');
+
+    function release() {
+      clearInterval(current.tick);
+      current.stream?.getTracks().forEach((track) => track.stop());
+
+      if (session.current === current) session.current = null;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      current.stream = stream;
+
+      if (session.current !== current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+
+      const type = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg']
+        .find((format) => MediaRecorder.isTypeSupported(format));
+      const recorder = type
+        ? new MediaRecorder(stream, { mimeType: type })
+        : new MediaRecorder(stream);
+
+      current.recorder = recorder;
+      const chunks = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size) chunks.push(event.data);
+      };
+
+      recorder.onerror = () => {
+        const active = session.current === current;
+        release();
+
+        if (active && mounted.current) {
+          setError('Recording failed. Please try again.');
+          setPhase('idle');
+        }
+      };
+
+      recorder.onstop = () => {
+        const active = session.current === current;
+        release();
+
+        if (!active || !mounted.current) return;
+
+        const mime = recorder.mimeType || chunks[0]?.type || 'audio/webm';
+        const blob = new Blob(chunks, { type: mime });
+
+        if (!blob.size) {
+          setError('No audio was recorded. Please try again.');
+        } else {
+          const url = URL.createObjectURL(blob);
+          audioUrl.current = url;
+          const extension = mime.includes('mp4')
+            ? 'm4a'
+            : mime.includes('ogg')
+              ? 'ogg'
+              : 'webm';
+          setClip({ blob, url, extension });
+        }
+
+        setPhase('idle');
+      };
+
+      recorder.start();
+      setPhase('recording');
+
+      const deadline = Date.now() + 20000;
+
+      current.tick = setInterval(() => {
+        const left = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+        setRemaining(left);
+
+        if (!left && recorder.state === 'recording') recorder.stop();
+      }, 200);
+    } catch {
+      const active = session.current === current;
+      release();
+
+      if (active && mounted.current) {
+        setPhase('idle');
+        setError('Could not start recording. Check your microphone permission and try again.');
+      }
+    }
+  }
+
+  async function check() {
+    if (!clip || pending.current) return;
+
+    window.speechSynthesis?.cancel();
+
+    const controller = new AbortController();
+    pending.current = controller;
+    setPhase('checking');
+    setError('');
+
+    const form = new FormData();
+    form.append('audio', clip.blob, `quick-read.${clip.extension}`);
+
+    try {
+      const { data } = await api.post('/speaking/transcribe', form, {
+        signal: controller.signal,
+      });
+
+      const value = typeof data?.transcript === 'string'
+        ? data.transcript.trim()
+        : '';
+
+      if (!value) setError('No speech was detected. Try recording again.');
+      else setTranscript(value);
+    } catch (err) {
+      if (!controller.signal.aborted) {
+        const detail = err.response?.data?.detail;
+        setError(typeof detail === 'string'
+          ? detail
+          : 'Could not check your recording. Try again.');
+      }
+    } finally {
+      if (pending.current === controller) pending.current = null;
+      if (mounted.current && !controller.signal.aborted) setPhase('idle');
+    }
+  }
+
+  const busy = phase !== 'idle';
+  const missing = transcript ? missedWords(text, transcript) : [];
+
+  return (
+    <section className="bb-reading-panel bb-reading-quick">
+      <p className="bb-reading-kicker">
+        QUICK READ · {index + 1} OF {prompts.length}
+      </p>
+      <h2>Read one sentence aloud</h2>
+      <p className="bb-reading-help">
+        Listen to the full passage or the sentence below. Then read the
+        sentence into your microphone.
+      </p>
+
+      <blockquote>{text}</blockquote>
+
+      <div className="bb-reading-actions">
+        <button
+          type="button"
+          disabled={busy || !sentences.length}
+          onClick={() => listen(sentences)}
+        >
+          Play full passage
+        </button>
+        <button
+          type="button"
+          className="bb-reading-secondary"
+          disabled={busy || !text}
+          onClick={() => listen(text)}
+        >
+          Play this sentence
+        </button>
+        <button
+          type="button"
+          className="bb-reading-secondary"
+          disabled={busy}
+          onClick={() => window.speechSynthesis?.cancel()}
+        >
+          Stop audio
+        </button>
+        {phase === 'recording' ? (
+          <button
+            type="button"
+            onClick={() => session.current?.recorder?.stop()}
+          >
+            Stop recording · {clock(remaining)}
+          </button>
+        ) : (
+          <button type="button" disabled={busy || !text} onClick={record}>
+            {phase === 'requesting'
+              ? 'Opening microphone…'
+              : clip
+                ? 'Record again'
+                : 'Start timer & record'}
+          </button>
+        )}
+      </div>
+
+      {clip && <audio controls src={clip.url} className="bb-reading-audio" />}
+      {clip && (
+        <button type="button" disabled={busy} onClick={check}>
+          {phase === 'checking' ? 'Checking…' : 'Check recording'}
+        </button>
+      )}
+
+      {error && <p role="alert" className="bb-reading-error">{error}</p>}
+
+      {transcript && (
+        <div className="bb-reading-review" role="status">
+          <h3>What the transcript picked up</h3>
+          <p>{transcript}</p>
+          <h3>
+            {missing.length
+              ? 'Words to try again'
+              : 'All sentence words were detected in order'}
+          </h3>
+
+          {missing.length > 0 && (
+            <div className="bb-reading-actions">
+              {missing.map((word) => (
+                <button
+                  key={word}
+                  type="button"
+                  className="bb-reading-secondary"
+                  disabled={busy}
+                  onClick={() => listen(word, 0.75)}
+                >
+                  Listen: {word}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <p className="bb-reading-help">
+            Speech recognition can miss a word even when you say it correctly.
+          </p>
+        </div>
+      )}
+
+      <div className="bb-reading-actions">
+        <button
+          type="button"
+          className="bb-reading-secondary"
+          disabled={busy || index === 0}
+          onClick={() => goToSentence(index - 1)}
+        >
+          ← Previous
+        </button>
+        <button
+          type="button"
+          className="bb-reading-secondary"
+          disabled={busy || index + 1 >= prompts.length}
+          onClick={() => goToSentence(index + 1)}
+        >
+          Next sentence →
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function Quiz({ passage, active, onRunning, onWork }) {
+  const [answers, setAnswers] = useState({});
+  const [phase, setPhase] = useState('ready');
+  const [remaining, setRemaining] = useState(passage.minutes * 60);
+  const [result, setResult] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [fontSize, setFontSize] = useState(18);
+
+  const started = useRef(null);
+  const deadline = useRef(null);
+  const dialog = useRef(null);
+  const saveLock = useRef(false);
+
+  const total = passage.questions.length;
+  const answered = Object.values(answers).filter((value) => normalise(value)).length;
+
+  useEffect(() => {
+    onWork(phase !== 'ready' && !saved);
+  }, [phase, saved, onWork]);
+
+  useEffect(() => {
+    if (phase !== 'running') return;
+
+    function tick() {
+      const left = Math.max(0, Math.ceil((deadline.current - Date.now()) / 1000));
+      setRemaining(left);
+
+      if (!left) {
+        setPhase('expired');
+        onRunning(false);
+      }
+    }
+
+    const interval = setInterval(tick, 200);
+    document.addEventListener('visibilitychange', tick);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', tick);
+    };
+  }, [phase, onRunning]);
+
+  function start() {
+    if (started.current !== null) return;
+
+    dialog.current?.close();
+    started.current = Date.now();
+    deadline.current = started.current + passage.minutes * 60000;
+    setPhase('running');
+    onRunning(true);
+  }
+
+  function showTimerDialog() {
+    if (dialog.current && !dialog.current.open) dialog.current.showModal();
+  }
+
+  function change(index, value) {
+    if (phase === 'running' && Date.now() < deadline.current) {
+      setAnswers((previous) => ({ ...previous, [index]: value }));
+    }
+  }
+
+  async function save(attempt) {
+    if (saveLock.current) return;
+
+    saveLock.current = true;
+    setSaving(true);
+    setNotice('');
+
+    try {
+      await savePracticeAttempt(attempt);
+      setSaved(true);
+    } catch {
+      setNotice('Could not save to Practice history. You can retry.');
+    } finally {
+      saveLock.current = false;
+      setSaving(false);
+    }
+  }
+
+  function submit(event) {
+    event.preventDefault();
+
+    if (phase === 'ready') {
+      showTimerDialog();
+      return;
+    }
+
+    if (result) return;
+    if (
+      answered < total &&
+      !window.confirm('Some questions are unanswered. Check answers anyway?')
+    ) return;
+
+    const attempt = {
+      skill: 'reading',
+      title: passage.title,
+      elapsed_seconds: Math.floor(
+        (Math.min(Date.now(), deadline.current) - started.current) / 1000,
+      ),
+      score: passage.questions.filter(
+        (question, index) => correct(question, answers[index] ?? ''),
+      ).length,
+      total_questions: total,
+    };
+
+    setPhase('finished');
+    onRunning(false);
+    setResult(attempt);
+    void save(attempt);
+  }
+
+  return (
+    <div hidden={!active}>
+      <div className="bb-reading-timer">
+        <strong role="timer">{clock(remaining)}</strong>
+        <span>{answered}/{total} answered</span>
+        {phase === 'ready' && (
+          <button type="button" onClick={start}>Start timer</button>
+        )}
+        {phase === 'expired' && (
+          <strong>Time is up. You can check your answers.</strong>
+        )}
+      </div>
+
+      {result && (
+        <div className="bb-reading-result">
+          <strong>Score: {result.score}/{total}</strong>
+          {saving && <span role="status">Saving…</span>}
+          {saved && <span role="status">Saved to Practice history.</span>}
+          {notice && <span role="alert">{notice}</span>}
+          {notice && (
+            <button type="button" onClick={() => save(result)}>Retry save</button>
+          )}
+        </div>
+      )}
+
+      <div className="bb-reading-workspace">
+        <section className="bb-reading-panel">
+          <div className="bb-reading-panel-head">
+            <h2>{passage.title}</h2>
+            <div className="bb-reading-actions">
+              <button
+                type="button"
+                className="bb-reading-secondary"
+                aria-label="Make text smaller"
+                onClick={() => setFontSize((size) => Math.max(14, size - 2))}
+              >
+                A−
+              </button>
+              <button
+                type="button"
+                className="bb-reading-secondary"
+                aria-label="Make text larger"
+                onClick={() => setFontSize((size) => Math.min(26, size + 2))}
+              >
+                A+
+              </button>
+            </div>
+          </div>
+
+          <div className="bb-reading-scroll bb-reading-passage" style={{ fontSize }}>
+            {passage.paragraphs.map((paragraph, index) => (
+              <p key={index}>
+                <strong>{String.fromCharCode(65 + index)}</strong> {paragraph}
+              </p>
+            ))}
+          </div>
+        </section>
+
+        <form className="bb-reading-panel" onSubmit={submit}>
+          <h2>Practice questions</h2>
+          {phase === 'ready' && (
+            <button
+              type="button"
+              className="bb-reading-secondary"
+              onClick={showTimerDialog}
+            >
+              Unlock answer fields
+            </button>
+          )}
+
+          <div className="bb-reading-scroll">
+            {passage.questions.map((question, index) => {
+              const value = answers[index] ?? '';
+              const isCorrect = Boolean(result && correct(question, value));
+              const locked = phase !== 'running';
+
+              return (
+                <section key={index} className="bb-reading-question">
+                  <p className="bb-reading-help">
+                    {index + 1} of {total} · {question.type}
+                  </p>
+                  <h3 id={`reading-question-${index}`}>{question.prompt}</h3>
+
+                  {question.options ? (
+                    question.type === TYPES[4] ? (
+                      <select
+                        aria-labelledby={`reading-question-${index}`}
+                        value={value}
+                        disabled={locked}
+                        onChange={(event) => change(index, event.target.value)}
+                      >
+                        <option value="">Choose a heading</option>
+                        {question.options.map((option) => (
+                          <option key={option}>{option}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <fieldset
+                        aria-labelledby={`reading-question-${index}`}
+                        disabled={locked}
+                      >
+                        {question.options.map((option) => (
+                          <label key={option} className="bb-reading-option">
+                            <input
+                              type="radio"
+                              name={`reading-answer-${index}`}
+                              checked={value === option}
+                              onChange={() => change(index, option)}
+                            />
+                            {option}
+                          </label>
+                        ))}
+                      </fieldset>
+                    )
+                  ) : (
+                    <>
+                      <label htmlFor={`reading-answer-${index}`}>
+                        Answer · maximum {question.limit ?? 1}{' '}
+                        {(question.limit ?? 1) === 1 ? 'word' : 'words'}
+                      </label>
+                      <input
+                        id={`reading-answer-${index}`}
+                        type="text"
+                        value={value}
+                        disabled={locked}
+                        maxLength={100}
+                        autoComplete="off"
+                        spellCheck={false}
+                        onChange={(event) => change(index, event.target.value)}
+                      />
+                      {!withinLimit(question, value) && (
+                        <p className="bb-reading-error">
+                          Your answer exceeds the word limit.
+                        </p>
+                      )}
+                    </>
+                  )}
+
+                  {result && (
+                    <div className={`bb-reading-answer${isCorrect ? ' is-correct' : ''}`}>
+                      <strong>
+                        {isCorrect ? 'Correct' : value.trim() ? 'Incorrect' : 'Unanswered'}
+                      </strong>
+                      <p>Your answer: {value.trim() || '—'}</p>
+                      {!isCorrect && <p>Correct answer: <strong>{question.answer}</strong></p>}
+                      <p>{question.explanation}</p>
+                    </div>
+                  )}
+                </section>
+              );
+            })}
+          </div>
+
+          {!result && (
+            <button className="bb-reading-submit" type="submit">
+              Check answers →
+            </button>
+          )}
+        </form>
+      </div>
+
+      <dialog ref={dialog} className="bb-reading-dialog" aria-labelledby="reading-timer-title">
+        <h2 id="reading-timer-title">Start the timer to begin</h2>
+        <p>You have {passage.minutes} minutes. Answers lock when time is up.</p>
+        <div className="bb-reading-actions">
+          <button type="button" onClick={start}>Start timer</button>
+          <button
+            type="button"
+            className="bb-reading-secondary"
+            onClick={() => dialog.current?.close()}
+          >
+            Not yet
+          </button>
+        </div>
+      </dialog>
+    </div>
+  );
 }
 
 export default function Reading() {
   const navigate = useNavigate();
-  const [index, setIndex] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [result, setResult] = useState(null);
-  const [saveStatus, setSaveStatus] = useState('idle');
-  const [seconds, setSeconds] = useState(0);
+
+  const [selected, setSelected] = useState(null);
+  const [level, setLevel] = useState('');
+  const [type, setType] = useState('');
+  const [page, setPage] = useState(0);
+  const [mode, setMode] = useState('quiz');
   const [running, setRunning] = useState(false);
-  const [fontSize, setFontSize] = useState(18);
-  const [notice, setNotice] = useState('');
+  const [hasWork, setHasWork] = useState(false);
 
-  const startedAt = useRef(null);
-  const elapsed = useRef(0);
-  const questionsRef = useRef(null);
-  const savingRef = useRef(false);
-
-  const passage = PASSAGES[index];
-  const total = passage.questions.length;
-  const answered = passage.questions.filter((_, i) => normalise(answers[i])).length;
-  const hasWork = answered > 0 || running || seconds > 0 || Boolean(result);
-  const unsaved = hasWork && saveStatus !== 'saved';
+  const catalog = useRef(null);
 
   useEffect(() => {
     if (!sessionStorage.getItem('band_buddy_access_token')) {
@@ -137,19 +739,7 @@ export default function Reading() {
   }, [navigate]);
 
   useEffect(() => {
-    if (!running) return;
-
-    const timer = window.setInterval(() => {
-      if (startedAt.current !== null) {
-        setSeconds(Math.floor((elapsed.current + Date.now() - startedAt.current) / 1000));
-      }
-    }, 250);
-
-    return () => window.clearInterval(timer);
-  }, [running]);
-
-  useEffect(() => {
-    if (!unsaved) return;
+    if (!hasWork) return;
 
     function warn(event) {
       event.preventDefault();
@@ -158,329 +748,208 @@ export default function Reading() {
 
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
-  }, [unsaved]);
+  }, [hasWork]);
 
-  function startTimer() {
-    if (startedAt.current !== null) return;
-    startedAt.current = Date.now();
-    setRunning(true);
-  }
+  function back() {
+    if (
+      hasWork &&
+      !window.confirm('Leave this set? Progress that has not been saved will be lost.')
+    ) return;
 
-  function stopTimer() {
-    if (startedAt.current !== null) {
-      elapsed.current += Date.now() - startedAt.current;
-      startedAt.current = null;
-    }
-
-    const duration = Math.floor(elapsed.current / 1000);
-    setSeconds(duration);
+    setSelected(null);
     setRunning(false);
-    return duration;
+    setHasWork(false);
   }
 
-  function updateAnswer(i, value) {
-    if (!result && elapsed.current === 0) startTimer();
-    setAnswers((current) => ({ ...current, [i]: value }));
-    setNotice('');
+  function changePage(nextPage) {
+    setPage(nextPage);
+    catalog.current?.focus({ preventScroll: true });
+    catalog.current?.scrollIntoView({ block: 'start' });
   }
 
-  function confirmClear() {
-    if (savingRef.current) return false;
-    return !unsaved || window.confirm('This practice is not saved. Leave or clear it anyway?');
-  }
-
-  function clearPractice(nextIndex = index) {
-    if (!confirmClear()) return;
-
-    startedAt.current = null;
-    elapsed.current = 0;
-    setIndex(nextIndex);
-    setAnswers({});
-    setResult(null);
-    setSaveStatus('idle');
-    setSeconds(0);
-    setRunning(false);
-    setNotice('');
-
-    if (questionsRef.current) questionsRef.current.scrollTop = 0;
-  }
-
-  function leavePage(event, destination) {
-    event.preventDefault();
-    if (confirmClear()) navigate(destination);
-  }
-
-  async function saveResult(attempt) {
-    if (savingRef.current) return;
-
-    savingRef.current = true;
-    setSaveStatus('saving');
-
-    try {
-      await savePracticeAttempt(attempt);
-      setSaveStatus('saved');
-    } catch {
-      setSaveStatus('error');
-    } finally {
-      savingRef.current = false;
-    }
-  }
-
-  function checkAnswers(event) {
-    event.preventDefault();
-    if (result || savingRef.current) return;
-
-    if (answered === 0) {
-      setNotice('Answer at least one question before checking.');
-      return;
-    }
-
-    if (answered < total && !window.confirm('Some questions are unanswered. Check anyway?')) {
-      return;
-    }
-
-    const attempt = {
-      skill: 'reading',
-      title: passage.title,
-      elapsed_seconds: stopTimer(),
-      score: passage.questions.filter(
-        (question, i) => normalise(answers[i]) === normalise(question.answer)
-      ).length,
-      total_questions: total,
-    };
-
-    setNotice('');
-    setResult(attempt);
-
-    if (questionsRef.current) {
-      questionsRef.current.scrollTop = 0;
-      questionsRef.current.focus();
-    }
-
-    void saveResult(attempt);
-  }
+  const filtered = SETS.filter(
+    (set) => (!level || set.level === level) && (!type || set.types.includes(type)),
+  );
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const visible = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   return (
-    <div className="rp-page">
-      <div className="rp-content rp-practice-content">
-        <header className="rp-practice-header">
-          <Link
-            className="rp-practice-logo"
-            to="/dashboard"
-            onClick={(event) => leavePage(event, '/dashboard')}
-            aria-label="Band Buddy dashboard"
-          >
-            <img src="/images/logo.png" alt="Band Buddy" />
-          </Link>
-
-          <Link
-            className="rp-practice-back"
-            to="/dashboard"
-            onClick={(event) => leavePage(event, '/dashboard')}
-          >
-            ← Back to dashboard
-          </Link>
-        </header>
-
-        <main className="rp-main">
-          <section className="rp-hero">
+    <div className="bb-reading">
+      {!selected ? (
+        <>
+          <header className="bb-reading-hero">
             <div>
-              <p className="rp-eyebrow">READ. UNDERSTAND. GROW.</p>
+              <p className="bb-reading-kicker">BAND BUDDY · IELTS PRACTICE</p>
               <h1>Reading practice</h1>
-              <p>Build your reading skills, one passage at a time.</p>
+              <p>Choose a passage, practise against the timer, or read a sentence aloud.</p>
             </div>
-            <img className="rp-hero-image" src="/images/reading-student-v2.png" alt="" />
-          </section>
+            <svg className="bb-reading-art" viewBox="0 0 180 130" aria-hidden="true">
+              <circle cx="90" cy="65" r="57" fill="#c8e4fc" />
+              <path
+                d="M90 42Q64 26 34 34v56q30-8 56 10 26-18 56-10V34q-30-8-56 8Z"
+                fill="#fff"
+                stroke="#367dbd"
+                strokeWidth="3"
+              />
+              <path
+                d="M90 43v56M46 48q19-5 32 5m-32 9q19-5 32 5m-32 9q19-5 32 5m24-28q14-10 32-5m-32 19q14-10 32-5m-32 19q14-10 32-5"
+                fill="none"
+                stroke="#6ca8d9"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+            </svg>
+          </header>
 
-          <nav className="rp-tabs" aria-label="Practice skills">
-            <span aria-current="page">Reading</span>
-            <button type="button" onClick={() => {
-              if (confirmClear()) navigate('/listening');
-            }}>
-              Listening →
-            </button>
-          </nav>
-
-          {notice && <p className="rp-notice" role="status">{notice}</p>}
-
-          <div className="rp-toolbar">
-            <label className="rp-resource">
-              <span>Choose a passage</span>
+          <div className="bb-reading-filters">
+            <label>
+              Level
               <select
-                value={index}
-                disabled={saveStatus === 'saving'}
-                onChange={(event) => clearPractice(Number(event.target.value))}
+                value={level}
+                onChange={(event) => {
+                  setLevel(event.target.value);
+                  setPage(0);
+                }}
               >
-                {PASSAGES.map((item, i) => (
-                  <option key={item.id} value={i}>
-                    Practice {i + 1}: {item.title}
-                  </option>
-                ))}
+                <option value="">All levels</option>
+                {LEVELS.map((item) => <option key={item}>{item}</option>)}
               </select>
             </label>
 
-            <div className="rp-timer">
-              <span aria-label="Elapsed practice time">{formatClock(seconds)}</span>
+            <label>
+              Question type
+              <select
+                value={type}
+                onChange={(event) => {
+                  setType(event.target.value);
+                  setPage(0);
+                }}
+              >
+                <option value="">All question types</option>
+                {TYPES.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+
+            {(level || type) && (
               <button
                 type="button"
-                className="rp-button rp-outline"
-                onClick={running ? stopTimer : startTimer}
-                disabled={Boolean(result)}
+                className="bb-reading-secondary"
+                onClick={() => {
+                  setLevel('');
+                  setType('');
+                  setPage(0);
+                }}
               >
-                {running ? 'Pause' : seconds > 0 ? 'Resume timer' : 'Start timer'}
+                Clear filters
               </button>
-            </div>
+            )}
           </div>
 
-          <div className="rp-workspace">
-            <section className="rp-panel rp-passage">
-              <div className="rp-panel-heading">
-                <h2>{passage.title}</h2>
-                <div className="rp-font-controls" aria-label="Passage text size">
+          <p ref={catalog} tabIndex={-1} role="status">
+            {filtered.length} practice {filtered.length === 1 ? 'set' : 'sets'}
+            {pageCount > 1 ? ` · Page ${page + 1} of ${pageCount}` : ''}
+          </p>
+
+          {!visible.length && <p>No passages match these filters.</p>}
+
+          <div className="bb-reading-cards">
+            {visible.map((set) => (
+              <article key={set.id} className="bb-reading-card">
+                <span className={`bb-reading-badge level-${set.level.toLowerCase()}`}>
+                  {set.level}
+                </span>
+                <h2>{set.title}</h2>
+                <p className="bb-reading-meta">
+                  {set.questions.length} questions · {set.minutes} min
+                </p>
+                <p className="bb-reading-types">{set.types.join(' · ')}</p>
+                {set.requiredPlan === 'trial' ? (
                   <button
                     type="button"
-                    aria-label="Decrease text size"
-                    disabled={fontSize <= 16}
-                    onClick={() => setFontSize((size) => size - 1)}
+                    aria-label={`Start practice: ${set.title}`}
+                    onClick={() => {
+                      setMode('quiz');
+                      setSelected(set);
+                    }}
                   >
-                    A−
+                    Start practice →
                   </button>
+                ) : (
                   <button
+                    className="bb-reading-secondary"
                     type="button"
-                    aria-label="Increase text size"
-                    disabled={fontSize >= 24}
-                    onClick={() => setFontSize((size) => size + 1)}
+                    onClick={() => navigate(`/plans#bb-plan-title-${set.requiredPlan}`)}
                   >
-                    A+
+                    {{ starter: 'Starter', plus: 'Plus', premium: 'Premium' }[set.requiredPlan]} plan required →
                   </button>
-                </div>
-              </div>
-
-              <div key={passage.id} className="rp-panel-scroll" tabIndex={0} aria-label="Reading passage">
-                <p className="rp-sample-note">Original sample passage about a fictional setting.</p>
-                <div style={{ fontSize }}>
-                  {passage.paragraphs.map((paragraph, i) => (
-                    <div className="rp-paragraph" key={i}>
-                      <span className="rp-paragraph-label">{String.fromCharCode(65 + i)}</span>
-                      <p>{paragraph}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            <section className="rp-panel">
-              <div className="rp-panel-heading">
-                <h2>Practice questions</h2>
-                <span className="rp-badge">{answered}/{total} answered</span>
-              </div>
-
-              <div className="rp-panel-scroll" ref={questionsRef} tabIndex={0} aria-label="Questions and results">
-                {result && (
-                  <div className="rp-result">
-                    <strong>Your result: {result.score}/{total}</strong>
-                    <p>Practice time: {formatClock(result.elapsed_seconds)}</p>
-                    <p role="status">
-                      {saveStatus === 'saving' && 'Saving to practice history…'}
-                      {saveStatus === 'saved' && 'Saved to practice history.'}
-                      {saveStatus === 'error' && 'Could not save your result.'}
-                    </p>
-                    {saveStatus === 'error' && (
-                      <button type="button" className="rp-button rp-outline" onClick={() => void saveResult(result)}>
-                        Retry save
-                      </button>
-                    )}
-                  </div>
                 )}
-
-                <form onSubmit={checkAnswers}>
-                  {passage.questions.map((question, i) => {
-                    const correct = normalise(answers[i]) === normalise(question.answer);
-                    const type = question.options === TRUE_FALSE
-                      ? 'True / False / Not given'
-                      : question.options ? 'Multiple choice' : 'One word';
-
-                    return (
-                      <fieldset className="rp-question" key={`${passage.id}-${i}`} disabled={Boolean(result)}>
-                        <legend>
-                          <span className="rp-question-meta">
-                            <span>Question {i + 1} of {total}</span>
-                            <span>{type}</span>
-                          </span>
-                          {question.prompt}
-                        </legend>
-
-                        {question.options ? (
-                          <div className="rp-options">
-                            {question.options.map((option) => (
-                              <label className="rp-option" key={option}>
-                                <input
-                                  type="radio"
-                                  name={`reading-${i}`}
-                                  value={option}
-                                  checked={answers[i] === option}
-                                  onChange={() => updateAnswer(i, option)}
-                                />
-                                <span>{option}</span>
-                              </label>
-                            ))}
-                          </div>
-                        ) : (
-                          <input
-                            className="rp-input"
-                            aria-label={`Answer to question ${i + 1}`}
-                            placeholder="Type one word…"
-                            autoComplete="off"
-                            spellCheck={false}
-                            maxLength={100}
-                            value={answers[i] || ''}
-                            onChange={(event) => updateAnswer(i, event.target.value)}
-                          />
-                        )}
-
-                        {result && (
-                          <div className="rp-explanation">
-                            <strong>{correct ? 'Correct' : normalise(answers[i]) ? 'Incorrect' : 'Not answered'}</strong>
-                            <p>Correct answer: {question.answer}</p>
-                            <p>{question.explanation}</p>
-                          </div>
-                        )}
-                      </fieldset>
-                    );
-                  })}
-
-                  <div className="rp-actions">
-                    <button
-                      type="button"
-                      className="rp-button rp-outline"
-                      onClick={() => clearPractice()}
-                      disabled={saveStatus === 'saving'}
-                    >
-                      {result ? 'Try again' : 'Reset answers'}
-                    </button>
-
-                    {!result && (
-                      <button type="submit" className="rp-button">Check answers</button>
-                    )}
-                  </div>
-                </form>
-              </div>
-            </section>
+              </article>
+            ))}
           </div>
 
-          <div className="rp-bottom">
-            <span>Passage {index + 1} of {PASSAGES.length}</span>
+          {pageCount > 1 && (
+            <nav aria-label="Reading passage pages" className="bb-reading-pagination">
+              <button
+                type="button"
+                className="bb-reading-secondary"
+                disabled={!page}
+                onClick={() => changePage(page - 1)}
+              >
+                ← Previous
+              </button>
+              <span>{page + 1} / {pageCount}</span>
+              <button
+                type="button"
+                className="bb-reading-secondary"
+                disabled={page + 1 >= pageCount}
+                onClick={() => changePage(page + 1)}
+              >
+                Next →
+              </button>
+            </nav>
+          )}
+        </>
+      ) : (
+        <>
+          <button type="button" className="bb-reading-secondary" onClick={back}>
+            ← All passages
+          </button>
+          <h1 className="bb-reading-session-title">{selected.title}</h1>
+
+          <div className="bb-reading-actions bb-reading-modes" role="group" aria-label="Reading mode">
             <button
               type="button"
-              className="rp-button"
-              disabled={index === PASSAGES.length - 1 || saveStatus === 'saving'}
-              onClick={() => clearPractice(index + 1)}
+              aria-pressed={mode === 'quiz'}
+              onClick={() => setMode('quiz')}
             >
-              Next passage →
+              Answer questions
+            </button>
+            <button
+              type="button"
+              aria-pressed={mode === 'aloud'}
+              disabled={running}
+              onClick={() => setMode('aloud')}
+            >
+              Quick Read
             </button>
           </div>
-        </main>
-      </div>
+
+          {running && (
+            <p className="bb-reading-help">
+              Quick Read opens when the quiz timer ends or you check your answers.
+            </p>
+          )}
+
+          <Quiz
+            key={selected.id}
+            passage={selected}
+            active={mode === 'quiz'}
+            onRunning={setRunning}
+            onWork={setHasWork}
+          />
+          {mode === 'aloud' && <QuickRead key={selected.id} passage={selected} />}
+        </>
+      )}
     </div>
   );
 }

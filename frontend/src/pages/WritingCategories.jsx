@@ -1,140 +1,45 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import './WritingCategories.css';
 
-const categories = [
-  {
-    id: 'discussion',
-    group: 'essay',
-    title: 'Discussion essay',
-    subtitle: 'TASK 2 · ACADEMIC & GENERAL TRAINING',
-    description: 'Explore both views and explain your opinion.',
-    icon: 'discussion',
-    available: true,
-  },
-  {
-    id: 'opinion',
-    group: 'essay',
-    title: 'Opinion essay',
-    subtitle: 'TASK 2 · ACADEMIC & GENERAL TRAINING',
-    description: 'Explain whether you agree or disagree.',
-    icon: 'opinion',
-    available: true,
-  },
-  {
-    id: 'letters',
-    group: 'general',
-    title: 'Letter writing',
-    subtitle: 'TASK 1 · GENERAL TRAINING',
-    description: 'Practise writing for everyday situations.',
-    icon: 'letter',
-    available: true,
-  },
-  {
-    id: 'bar',
-    group: 'academic',
-    title: 'Bar chart',
-    subtitle: 'TASK 1 · ACADEMIC',
-    description: 'Compare categories and important figures.',
-    icon: 'bar',
-    available: true,
-  },
-  {
-    id: 'line',
-    group: 'academic',
-    title: 'Line graph',
-    subtitle: 'TASK 1 · ACADEMIC',
-    description: 'Describe patterns and changes over time.',
-    icon: 'line',
-    available: true,
-  },
-  {
-    id: 'pie',
-    group: 'academic',
-    title: 'Pie chart',
-    subtitle: 'TASK 1 · ACADEMIC',
-    description: 'Compare proportions and percentages.',
-    icon: 'pie',
-    available: true
-  },
-  {
-    id: 'map',
-    group: 'academic',
-    title: 'Maps',
-    subtitle: 'TASK 1 · ACADEMIC',
-    description: 'Describe locations and changes to a place.',
-    icon: 'map',
-    available: true,
-  },
-  {
-    id: 'process',
-    group: 'academic',
-    title: 'Process diagram',
-    subtitle: 'TASK 1 · ACADEMIC',
-    description: 'Explain stages in a process or cycle.',
-    icon: 'process',
-    available: true,
-  },
-  {
-    id: 'table',
-    group: 'academic',
-    title: 'Table',
-    subtitle: 'TASK 1 · ACADEMIC',
-    description: 'Summarise data and make comparisons.',
-    icon: 'table',
-    available: true,
-  },
+const filters = [
+  ['all', 'All writing'],
+  ['academic', 'Academic · Task 1'],
+  ['general', 'General Training · Task 1'],
+  ['essay', 'Task 2 · Essays'],
 ];
 
-function CategoryIcon({ name }) {
-  const paths = {
-    discussion: (
-      <>
-        <path d="M3 3h13v10H9l-4 4v-4H3Z" />
-        <path d="M19 8h3v12h-4l-3 3v-3h-4v-4" />
-      </>
-    ),
-    opinion: (
-      <>
-        <path d="M8 15a6 6 0 1 1 8 0l-1 3H9Z" />
-        <path d="M9 21h6M10 18h4" />
-      </>
-    ),
-    letter: (
-      <>
-        <rect x="2" y="5" width="20" height="15" rx="2" />
-        <path d="m3 7 9 7 9-7" />
-      </>
-    ),
-    bar: <path d="M3 3v18h19M7 17v-6M12 17V6M17 17V9" />,
-    line: <path d="M3 3v18h19M6 15l5-6 5 3 5-7" />,
-    pie: (
-      <>
-        <path d="M11 3a9 9 0 1 0 10 10H11Z" />
-        <path d="M15 2v7h7a8 8 0 0 0-7-7Z" />
-      </>
-    ),
-    map: (
-      <>
-        <path d="m2 5 7-3 6 3 7-3v17l-7 3-6-3-7 3ZM9 2v17M15 5v17" />
-      </>
-    ),
-    process: (
-      <>
-        <rect x="2" y="3" width="7" height="6" rx="1" />
-        <rect x="15" y="15" width="7" height="6" rx="1" />
-        <path d="M9 6h9v6m-3-3 3 3 3-3M5 9v9h7" />
-      </>
-    ),
-    table: (
-      <>
-        <rect x="3" y="3" width="18" height="18" rx="2" />
-        <path d="M3 9h18M9 3v18M3 15h18" />
-      </>
-    ),
-  };
+const subtitles = {
+  essay: 'TASK 2 · ACADEMIC & GENERAL TRAINING',
+  general: 'TASK 1 · GENERAL TRAINING',
+  academic: 'TASK 1 · ACADEMIC',
+};
 
+const categories = [
+  ['discussion', 'essay', 'Discussion essay', 'Explore both views and explain your opinion.'],
+  ['opinion', 'essay', 'Opinion essay', 'Explain whether you agree or disagree.'],
+  ['letters', 'general', 'Letter writing', 'Practise writing for everyday situations.'],
+  ['bar', 'academic', 'Bar chart', 'Compare categories and important figures.'],
+  ['line', 'academic', 'Line graph', 'Describe patterns and changes over time.'],
+  ['pie', 'academic', 'Pie chart', 'Compare proportions and percentages.'],
+  ['map', 'academic', 'Maps', 'Describe locations and changes to a place.'],
+  ['process', 'academic', 'Process diagram', 'Explain stages in a process or cycle.'],
+  ['table', 'academic', 'Table', 'Summarise data and make comparisons.'],
+];
+
+const icons = {
+  discussion: 'M3 3h13v10H9l-4 4v-4H3ZM19 8h3v12h-4l-3 3v-3h-4v-4',
+  opinion: 'M8 15a6 6 0 1 1 8 0l-1 3H9ZM9 21h6',
+  letters: 'M4 5h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm-1 2 9 7 9-7',
+  bar: 'M3 3v18h19M7 17v-6M12 17V6M17 17V9',
+  line: 'M3 3v18h19M6 15l5-6 5 3 5-7',
+  pie: 'M11 3a9 9 0 1 0 10 10H11ZM15 2v7h7a8 8 0 0 0-7-7Z',
+  map: 'm2 5 7-3 6 3 7-3v17l-7 3-6-3-7 3ZM9 2v17M15 5v17',
+  process: 'M2 3h7v6H2ZM15 15h7v6h-7ZM9 6h9v6m-3-3 3 3 3-3M5 9v9h7',
+  table: 'M3 3h18v18H3ZM3 9h18M9 3v18M3 15h18',
+};
+
+function CategoryIcon({ name }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -145,148 +50,87 @@ function CategoryIcon({ name }) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      {paths[name]}
+      <path d={icons[name]} />
+    </svg>
+  );
+}
+
+function WritingDecoration() {
+  return (
+    <svg className="wc-heading-art" viewBox="0 0 280 130" fill="none" aria-hidden="true">
+      <g stroke="#609ce0" opacity=".55">
+        <path d="M4 18h270M4 41h270M4 64h270M4 87h270M4 110h270" />
+      </g>
+      <g stroke="#255f9f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m211 87 5-15 39-44a5 5 0 0 1 8 7l-39 44ZM216 72l8 7M250 34l8 7m5-6 5 4-15 17" />
+        <path d="M164 89c12 0 14-9 24-5 7 3 11 6 18 3" />
+      </g>
     </svg>
   );
 }
 
 export default function WritingCategories() {
-  const navigate = useNavigate();
-  const [ready, setReady] = useState(false);
-  const [error, setError] = useState('');
-  const [retry, setRetry] = useState(0);
   const [filter, setFilter] = useState('all');
-
-  useEffect(() => {
-    let active = true;
-    const controller = new AbortController();
-
-    if (!sessionStorage.getItem('band_buddy_access_token')) {
-      navigate('/login', { replace: true });
-      return;
-    }
-
-    setError('');
-
-    api.get('/auth/me', { signal: controller.signal })
-      .then(() => {
-        if (active) setReady(true);
-      })
-      .catch((err) => {
-        if (!active) return;
-
-        if (err.response?.status === 401) {
-          sessionStorage.removeItem('band_buddy_access_token');
-          navigate('/login', { replace: true });
-        } else {
-          setError('Could not load writing practice. Please try again.');
-        }
-      });
-
-    return () => {
-      active = false;
-      controller.abort();
-    };
-  }, [navigate, retry]);
-
   const visibleCategories = categories.filter(
-    (category) => filter === 'all' || category.group === filter
+    ([, group]) => filter === 'all' || group === filter
   );
 
   return (
-    <div className="wc-page">
-      <header className="wc-header">
-        <Link to="/dashboard" aria-label="Band Buddy dashboard">
-          <img className="wc-navy-logo" src="/images/logo.png" alt="Band Buddy" />
-        </Link>
-        <Link to="/dashboard">← Back to dashboard</Link>
-      </header>
-
-      <main className="wc-main">
-        {!ready ? (
-          <div className="wc-state">
-            <p role={error ? 'alert' : 'status'}>
-              {error || 'Loading your writing practice…'}
+    <main className="wc-page">
+      <div className="wc-main">
+        <section className="wc-heading" aria-labelledby="wc-title">
+          <div className="wc-heading-copy">
+            <span>BUILD YOUR WRITING CONFIDENCE</span>
+            <h1 id="wc-title">Every good answer starts here.</h1>
+            <p>
+              Choose a question type. Take your time, organise your
+              ideas and make each answer your own.
             </p>
-            {error && (
-              <button type="button" onClick={() => setRetry((v) => v + 1)}>
-                Try again
-              </button>
-            )}
-          </div>
-        ) : (
-          <>
-            <section className="wc-heading">
-              <span>BUILD YOUR WRITING CONFIDENCE</span>
-              <h1>Every good answer starts here.</h1>
-              <p>
-                Choose a question type. Take your time, organise your
-                ideas and make each answer your own.
-              </p>
-              <div className="wc-heading-note">
-                Original sample questions · More practice types coming soon
-              </div>
-            </section>
-
-            <nav className="wc-filters" aria-label="Filter writing categories">
-              {[
-                ['all', 'All writing'],
-                ['academic', 'Academic · Task 1'],
-                ['general', 'General Training · Task 1'],
-                ['essay', 'Task 2 · Essays'],
-              ].map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={filter === value}
-                  className={filter === value ? 'is-selected' : ''}
-                  onClick={() => setFilter(value)}
-                >
-                  {label}
-                </button>
-              ))}
-            </nav>
-
-            <div className="wc-grid">
-              {visibleCategories.map((category) => {
-                const content = (
-                  <>
-                    <span className="wc-icon">
-                      <CategoryIcon name={category.icon} />
-                    </span>
-                    <div className="wc-card-copy">
-                      <span className="wc-subtitle">{category.subtitle}</span>
-                      <h2>{category.title}</h2>
-                      <p>{category.description}</p>
-                      <span className="wc-card-status">
-                        {category.available ? 'Open practice →' : 'Coming soon'}
-                      </span>
-                    </div>
-                  </>
-                );
-
-                return category.available ? (
-                  <Link
-                    className="wc-card"
-                    key={category.id}
-                    to={`/writing/practice?category=${category.id}`}
-                  >
-                    {content}
-                  </Link>
-                ) : (
-                  <article className="wc-card wc-unavailable" key={category.id}>
-                    {content}
-                  </article>
-                );
-              })}
+            <div className="wc-heading-note">
+              Original sample questions · More practice types coming soon
             </div>
+          </div>
+          <WritingDecoration />
+        </section>
 
-            <footer className="wc-footer">
-              Band Buddy · Small steps. Meaningful progress.
-            </footer>
-          </>
-        )}
-      </main>
-    </div>
+        <nav className="wc-filters" aria-label="Filter writing categories">
+          {filters.map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={filter === value}
+              className={filter === value ? 'is-selected' : ''}
+              onClick={() => setFilter(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="wc-grid">
+          {visibleCategories.map(([id, group, title, description]) => (
+            <Link
+              className="wc-card"
+              key={id}
+              to={`/writing/practice?category=${id}`}
+            >
+              <span className="wc-icon">
+                <CategoryIcon name={id} />
+              </span>
+              <div className="wc-card-copy">
+                <span className="wc-subtitle">{subtitles[group]}</span>
+                <h2>{title}</h2>
+                <p>{description}</p>
+                <span className="wc-card-status">Open practice →</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        <footer className="wc-footer">
+          Band Buddy · Small steps. Meaningful progress.
+        </footer>
+      </div>
+    </main>
   );
 }

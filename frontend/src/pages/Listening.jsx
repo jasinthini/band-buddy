@@ -1,134 +1,279 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { savePracticeAttempt } from '../services/practiceHistory';
-import './Reading.css';
+import originalSets from '../data/listeningQuestions.json';
+import extraSets from '../data/listeningExtraSets';
+import './Listening.css';
 
-const TITLE = 'Booking a workshop';
+const SETS = [...originalSets, ...extraSets];
+const PAGE_SIZE = 6;
+const DEMO_PLAN_KEY = 'bb_demo_plan';
 
-const DIALOGUE = [
-  ['Maya', 'Hello, I’d like to join the photography workshop. Is it still on Saturday morning?'],
-  ['Daniel', 'We moved it to Sunday. It starts at ten thirty in the morning.'],
-  ['Maya', 'Is it in the main hall?'],
-  ['Daniel', 'No, please go to Room Four on the first floor.'],
-  ['Maya', 'How much does it cost, and what should I bring?'],
-  ['Daniel', 'It costs twelve pounds. Bring a notebook. You can borrow a camera here.'],
+const PLAN_NAMES = {
+  starter: 'Starter',
+  plus: 'Plus',
+  premium: 'Premium',
+};
+
+const SLIDES = [
+  ['Listen carefully', 'Follow the conversation from beginning to end.'],
+  ['Catch key details', 'Listen for names, times, locations, and changes to plans.'],
+  ['Check your answers', 'Review your score and read the transcript after submitting.'],
 ];
 
-const QUESTIONS = [
-  {
-    prompt: 'Which day is the workshop?',
-    options: ['Friday', 'Saturday', 'Sunday'],
-    answer: 'Sunday',
-    explanation: 'Daniel says the workshop was moved to Sunday.',
-  },
-  {
-    prompt: 'What time does the workshop start?',
-    options: ['9:30 a.m.', '10:30 a.m.', '11:30 a.m.'],
-    answer: '10:30 a.m.',
-    explanation: 'Daniel says it starts at ten thirty in the morning.',
-  },
-  {
-    prompt: 'Where should Maya go?',
-    options: ['Room Two', 'Room Four', 'The main hall'],
-    answer: 'Room Four',
-    explanation: 'Daniel directs Maya to Room Four on the first floor.',
-  },
-  {
-    prompt: 'How much does the workshop cost?',
-    options: ['£10', '£12', '£20'],
-    answer: '£12',
-    explanation: 'Daniel says it costs twelve pounds.',
-  },
-  {
-    prompt: 'What should Maya bring?',
-    options: ['A camera', 'A laptop', 'A notebook'],
-    answer: 'A notebook',
-    explanation: 'She should bring a notebook. She can borrow a camera there.',
-  },
-];
+function getRequiredPlan(index) {
+  if (index === 0) return 'trial';
+  if (index < 5) return 'starter';
+  if (index < 15) return 'plus';
+  return 'premium';
+}
 
-export default function Listening() {
-  const [answers, setAnswers] = useState({});
-  const [result, setResult] = useState(null);
-  const [playing, setPlaying] = useState(false);
-  const [message, setMessage] = useState('');
-  const [saveStatus, setSaveStatus] = useState('idle');
+function getUnlockedSetCount(plan) {
+  switch (plan) {
+    case 'starter':
+      return 5;
+    case 'plus':
+      return 15;
+    case 'premium':
+      return SETS.length;
+    default:
+      return 1;
+  }
+}
 
-  const startedAtRef = useRef(null);
-  const playbackRef = useRef(null);
-  const questionsRef = useRef(null);
-  const savingRef = useRef(false);
+function normalise(value = '') {
+  return String(value).normalize('NFKC').toLowerCase().trim()
+    .replace(/[’‘]/g, "'")
+    .replace(/[.!?]+$/g, '')
+    .replace(/\s+/g, ' ');
+}
 
-  const synth = window.speechSynthesis;
-  const canPlay = Boolean(synth && window.SpeechSynthesisUtterance);
-  const answered = Object.keys(answers).length;
+function isCorrect(question, value = '') {
+  const clean = normalise(value);
+  if (!clean) return false;
+  if (question.limit && clean.split(' ').length > question.limit) return false;
+
+  return [question.answer, ...(question.acceptedAnswers ?? [])]
+    .some((answer) => normalise(answer) === clean);
+}
+
+function formatTime(seconds) {
+  return [Math.floor(seconds / 60), seconds % 60]
+    .map((number) => String(number).padStart(2, '0')).join(':');
+}
+
+function Headphones() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 14v-3a9 9 0 0 1 18 0v3" />
+      <rect x="3" y="12" width="4" height="8" rx="2" />
+      <rect x="17" y="12" width="4" height="8" rx="2" />
+    </svg>
+  );
+}
+
+function Waveform({ playing = false }) {
+  return (
+    <div className={`ls-waveform${playing ? ' ls-playing' : ''}`} aria-hidden="true">
+      {[10, 16, 25, 19, 33, 45, 24, 37, 48, 35, 20, 30, 17, 12].map((height, index) => (
+        <i key={index} style={{ '--height': `${height}px`, '--delay': `${index * -70}ms` }} />
+      ))}
+    </div>
+  );
+}
+
+function ListeningHero() {
+  const [slide, setSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    return () => {
-      if (playbackRef.current) {
-        playbackRef.current = null;
-        window.speechSynthesis?.cancel();
+    if (paused) return;
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    function advance() {
+      if (!preference.matches && !document.hidden) {
+        setSlide((index) => (index + 1) % SLIDES.length);
       }
-    };
+    }
+
+    const interval = window.setInterval(advance, 6500);
+    return () => window.clearInterval(interval);
+  }, [paused]);
+
+  return (
+    <header className={`ls-hero${paused ? ' ls-paused' : ''}`}>
+      <svg className="ls-background-wave" viewBox="0 0 1200 220"
+        preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 130C180 15 290 215 485 123S770 42 960 125s195 18 240-10v105H0Z" />
+        <path d="M0 160c160-58 235 28 425 14s295-112 490-45 227 52 285 20v71H0Z" />
+      </svg>
+      <div>
+        <p className="ls-kicker">BAND BUDDY · IELTS PRACTICE</p>
+        <h1>Listening practice</h1>
+        <p>Build confidence with conversations, announcements, and short briefings.</p>
+      </div>
+      <div className="ls-slide">
+        <div className="ls-slide-copy" key={slide}>
+          <p className="ls-kicker">LISTENING TIP {slide + 1} OF {SLIDES.length}</p>
+          <h2>{SLIDES[slide][0]}</h2>
+          <p>{SLIDES[slide][1]}</p>
+        </div>
+        <div className="ls-slide-controls" role="group" aria-label="Listening tips">
+          {SLIDES.map(([title], index) => (
+            <button key={title} type="button" className="ls-dot"
+              aria-label={`Show tip ${index + 1}: ${title}`}
+              aria-pressed={slide === index}
+              onClick={() => {
+                setSlide(index);
+                setPaused(true);
+              }}>
+              <span />
+            </button>
+          ))}
+          <button type="button" className="ls-pause" onClick={() => setPaused(!paused)}>
+            {paused ? 'Play slides' : 'Pause slides'}
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function ListeningExercise({ practice, onBack }) {
+  const duration = (practice.minutes ?? 8) * 60;
+  const [phase, setPhase] = useState('ready');
+  const [remaining, setRemaining] = useState(duration);
+  const [answers, setAnswers] = useState({});
+  const [playing, setPlaying] = useState(false);
+  const [audioError, setAudioError] = useState('');
+  const [result, setResult] = useState(null);
+  const [saveStatus, setSaveStatus] = useState('idle');
+  const started = useRef(null);
+  const deadline = useRef(null);
+  const playback = useRef(null);
+  const saving = useRef(false);
+  const timerDialog = useRef(null);
+  const total = practice.questions.length;
+  const answered = Object.values(answers).filter((value) => normalise(value)).length;
+
+  useEffect(() => () => {
+    if (playback.current) {
+      playback.current = null;
+      window.speechSynthesis?.cancel();
+    }
   }, []);
 
-  function startPractice() {
-    if (startedAtRef.current === null) {
-      startedAtRef.current = Date.now();
+  useEffect(() => {
+    if (phase !== 'running') return;
+
+    function tick() {
+      const left = Math.max(0, Math.ceil((deadline.current - Date.now()) / 1000));
+      setRemaining(left);
+
+      if (!left) {
+        if (playback.current) {
+          playback.current = null;
+          window.speechSynthesis?.cancel();
+        }
+        setPlaying(false);
+        setPhase('expired');
+      }
     }
+
+    const id = window.setInterval(tick, 200);
+    document.addEventListener('visibilitychange', tick);
+
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener('visibilitychange', tick);
+    };
+  }, [phase]);
+
+  function showTimer() {
+    if (timerDialog.current && !timerDialog.current.open) timerDialog.current.showModal();
   }
 
-  function stopConversation() {
-    if (playbackRef.current) {
-      playbackRef.current = null;
-      synth.cancel();
+  function startTimer() {
+    if (started.current !== null) return;
+    timerDialog.current?.close();
+    started.current = Date.now();
+    deadline.current = started.current + duration * 1000;
+    setPhase('running');
+  }
+
+  function stopAudio() {
+    if (playback.current) {
+      playback.current = null;
+      window.speechSynthesis?.cancel();
     }
     setPlaying(false);
   }
 
-  function playConversation() {
-    if (!canPlay || playbackRef.current) return;
-    if (!result) startPractice();
+  function playAudio() {
+    if (phase === 'ready') {
+      showTimer();
+      return;
+    }
+    if (!result && (phase !== 'running' || Date.now() >= deadline.current)) return;
+    if (playback.current) return;
 
-    const voices = synth.getVoices().filter((voice) => /^en\b/i.test(voice.lang));
+    const synth = window.speechSynthesis;
+    if (!synth || typeof window.SpeechSynthesisUtterance !== 'function') {
+      setAudioError('Audio playback is unavailable in this browser. Try a browser with an English system voice.');
+      return;
+    }
 
-    const lines = DIALOGUE.map(([speaker, text]) => {
-      const speech = new window.SpeechSynthesisUtterance(text);
-      const voice = voices[speaker === 'Maya' ? 0 : 1] || voices[0];
-
-      speech.lang = voice?.lang || 'en-GB';
-      if (voice) speech.voice = voice;
-      speech.rate = 0.9;
-      speech.pitch = speaker === 'Maya' ? 1.12 : 0.9;
-      return speech;
-    });
-
-    playbackRef.current = lines;
-    setMessage('');
+    setAudioError('');
+    const session = { utterance: null };
+    playback.current = session;
     setPlaying(true);
 
-    lines.forEach((speech, index) => {
-      speech.onend = () => {
-        if (playbackRef.current === lines && index === lines.length - 1) {
-          playbackRef.current = null;
-          setPlaying(false);
-        }
-      };
+    const englishVoices = synth.getVoices().filter((voice) => /^en(?:-|_)/i.test(voice.lang));
+    const voices = [
+      ...englishVoices.filter((voice) => /^en[-_]GB$/i.test(voice.lang)),
+      ...englishVoices.filter((voice) => !/^en[-_]GB$/i.test(voice.lang)),
+    ];
+    const speakers = [...new Set(practice.dialogue.map(([speaker]) => speaker))];
 
-      speech.onerror = () => {
-        if (playbackRef.current !== lines) return;
-        stopConversation();
-        setMessage('Audio could not play. Check your browser’s English voice and try again.');
-      };
-    });
+    function next(index) {
+      if (playback.current !== session) return;
 
-    lines.forEach((speech) => synth.speak(speech));
+      if (index >= practice.dialogue.length || (!result && Date.now() >= deadline.current)) {
+        playback.current = null;
+        setPlaying(false);
+        return;
+      }
+
+      const [speaker, line] = practice.dialogue[index];
+      const speakerIndex = speakers.indexOf(speaker);
+      const utterance = new window.SpeechSynthesisUtterance(line);
+      const voice = voices[speakerIndex % Math.max(voices.length, 1)];
+      utterance.lang = voice?.lang ?? 'en-GB';
+      if (voice) utterance.voice = voice;
+      utterance.rate = 0.92;
+      utterance.pitch = speakerIndex % 2 ? 0.92 : 1.05;
+      session.utterance = utterance;
+      utterance.onend = () => next(index + 1);
+      utterance.onerror = () => {
+        if (playback.current !== session) return;
+        playback.current = null;
+        setPlaying(false);
+        setAudioError('Could not play the audio. Check your browser’s speech settings and try again.');
+      };
+      synth.speak(utterance);
+    }
+
+    next(0);
   }
 
-  async function saveResult(attempt) {
-    if (savingRef.current) return;
+  function update(index, value) {
+    if (phase !== 'running' || Date.now() >= deadline.current) return;
+    setAnswers((previous) => ({ ...previous, [index]: value }));
+  }
 
-    savingRef.current = true;
+  async function save(attempt) {
+    if (saving.current) return;
+    saving.current = true;
     setSaveStatus('saving');
 
     try {
@@ -137,210 +282,267 @@ export default function Listening() {
     } catch {
       setSaveStatus('error');
     } finally {
-      savingRef.current = false;
+      saving.current = false;
     }
   }
 
-  function checkAnswers(event) {
+  function submit(event) {
     event.preventDefault();
-    if (result || savingRef.current) return;
 
-    if (answered < QUESTIONS.length) {
-      setMessage('Answer all five questions before checking.');
+    if (phase === 'ready') {
+      showTimer();
       return;
     }
+    if (result || saving.current) return;
+    if (answered < total && phase !== 'expired' &&
+      !window.confirm('Some answers are blank. Check your answers anyway?')) return;
+
+    stopAudio();
 
     const attempt = {
       skill: 'listening',
-      title: TITLE,
-      elapsed_seconds: Math.floor((Date.now() - (startedAtRef.current ?? Date.now())) / 1000),
-      score: QUESTIONS.filter((question, i) => answers[i] === question.answer).length,
-      total_questions: QUESTIONS.length,
+      title: practice.title,
+      elapsed_seconds: Math.floor((Math.min(Date.now(), deadline.current) - started.current) / 1000),
+      score: practice.questions.filter((question, index) => isCorrect(question, answers[index])).length,
+      total_questions: total,
     };
 
-    stopConversation();
-    setMessage('');
     setResult(attempt);
-
-    if (questionsRef.current) {
-      questionsRef.current.scrollTop = 0;
-      questionsRef.current.focus();
-    }
-
-    void saveResult(attempt);
+    setPhase('finished');
+    void save(attempt);
   }
 
-  function resetPractice() {
-    if (savingRef.current) return;
-    if (saveStatus === 'error' && !window.confirm('This result was not saved. Start again anyway?')) {
-      return;
-    }
-
-    stopConversation();
-    startedAtRef.current = null;
-    setAnswers({});
-    setResult(null);
-    setMessage('');
-    setSaveStatus('idle');
-
-    if (questionsRef.current) questionsRef.current.scrollTop = 0;
+  function back() {
+    if (phase !== 'ready' && saveStatus !== 'saved' &&
+      !window.confirm('Leave this practice? Unsaved progress will be lost.')) return;
+    stopAudio();
+    onBack();
   }
 
   return (
-    <div className="rp-page">
-      <div className="rp-content rp-practice-content">
-        <header className="rp-practice-header">
-          <Link className="rp-practice-logo" to="/dashboard" aria-label="Band Buddy dashboard">
-            <img src="/images/logo.png" alt="Band Buddy" />
-          </Link>
-          <Link className="rp-practice-back" to="/dashboard">
-            ← Back to dashboard
-          </Link>
-        </header>
-
-        <main className="rp-main">
-          <section className="rp-hero" aria-labelledby="listening-title">
-            <div>
-              <p className="rp-eyebrow">LISTEN. UNDERSTAND. GROW.</p>
-              <h1 id="listening-title">Listening practice</h1>
-              <p>Listen to a conversation and pick out the key details.</p>
-            </div>
-            <img className="rp-hero-image" src="/images/listening-hero.png" alt="" />
-          </section>
-
-          <nav className="rp-tabs" aria-label="Practice skills">
-            <Link className="rp-button rp-outline" to="/reading">← Reading</Link>
-            <span aria-current="page">Listening</span>
-          </nav>
-
-          {message && <p className="rp-notice" role="status">{message}</p>}
-
-          <div className="rp-workspace">
-            <section className="rp-panel" aria-labelledby="audio-title">
-              <div className="rp-panel-heading">
-                <h2 id="audio-title">{TITLE}</h2>
-                <span className="rp-badge">Practice 1</span>
-              </div>
-
-              <div className="rp-panel-scroll" tabIndex={0} aria-label="Conversation and transcript">
-                <p>Maya is asking Daniel about a photography workshop.</p>
-                <p>Read the questions first, then play the conversation.</p>
-
-                <button
-                  type="button"
-                  className="rp-button"
-                  disabled={!canPlay}
-                  onClick={playing ? stopConversation : playConversation}
-                >
-                  {playing ? '■ Stop audio' : '▶ Play conversation'}
-                </button>
-
-                <p className="rp-help" role="status">
-                  {!canPlay
-                    ? 'This browser does not support text-to-speech.'
-                    : playing
-                      ? 'Playing conversation…'
-                      : 'Practice audio uses your browser’s English voice.'}
-                </p>
-
-                {result && (
-                  <details>
-                    <summary>Read the transcript</summary>
-                    {DIALOGUE.map(([speaker, line], i) => (
-                      <p key={i}><strong>{speaker}:</strong> {line}</p>
-                    ))}
-                  </details>
-                )}
-              </div>
-            </section>
-
-            <section className="rp-panel" aria-labelledby="listening-questions">
-              <div className="rp-panel-heading">
-                <h2 id="listening-questions">Practice questions</h2>
-                <span className="rp-badge">{answered}/{QUESTIONS.length} answered</span>
-              </div>
-
-              <div
-                className="rp-panel-scroll"
-                ref={questionsRef}
-                tabIndex={0}
-                aria-label="Questions and results"
-              >
-                {result && (
-                  <div className="rp-result">
-                    <strong>Your result: {result.score}/{result.total_questions}</strong>
-                    <p role="status">
-                      {saveStatus === 'saving' && 'Saving to practice history…'}
-                      {saveStatus === 'saved' && 'Saved to practice history.'}
-                      {saveStatus === 'error' && 'Could not save your result. Please try again.'}
-                    </p>
-
-                    {saveStatus === 'error' && (
-                      <button
-                        type="button"
-                        className="rp-button rp-outline"
-                        onClick={() => void saveResult(result)}
-                      >
-                        Retry save
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                <form onSubmit={checkAnswers}>
-                  {QUESTIONS.map((question, i) => (
-                    <fieldset className="rp-question" key={question.prompt} disabled={Boolean(result)}>
-                      <legend>{i + 1}. {question.prompt}</legend>
-
-                      <div className="rp-options">
-                        {question.options.map((option) => (
-                          <label className="rp-option" key={option}>
-                            <input
-                              type="radio"
-                              name={`listening-${i}`}
-                              value={option}
-                              checked={answers[i] === option}
-                              onChange={() => {
-                                startPractice();
-                                setAnswers((current) => ({ ...current, [i]: option }));
-                                setMessage('');
-                              }}
-                            />
-                            <span>{option}</span>
-                          </label>
-                        ))}
-                      </div>
-
-                      {result && (
-                        <div className="rp-explanation">
-                          <strong>{answers[i] === question.answer ? 'Correct' : 'Incorrect'}</strong>
-                          <p>Correct answer: {question.answer}</p>
-                          <p>{question.explanation}</p>
-                        </div>
-                      )}
-                    </fieldset>
-                  ))}
-
-                  <div className="rp-actions">
-                    <button
-                      type="button"
-                      className="rp-button rp-outline"
-                      onClick={resetPractice}
-                      disabled={saveStatus === 'saving'}
-                    >
-                      {result ? 'Try again' : 'Reset answers'}
-                    </button>
-
-                    {!result && (
-                      <button type="submit" className="rp-button">Check answers</button>
-                    )}
-                  </div>
-                </form>
-              </div>
-            </section>
-          </div>
-        </main>
+    <>
+      <button type="button" className="ls-secondary" onClick={back}>← All listening practices</button>
+      <div className="ls-exercise-title">
+        <p className="ls-kicker">LISTENING SESSION</p>
+        <h1>{practice.title}</h1>
+        <p>{practice.intro}</p>
       </div>
+
+      <div className="ls-toolbar">
+        <span>Time left: <strong role="timer">{formatTime(remaining)}</strong></span>
+        <span>{answered}/{total} answered</span>
+        {phase === 'ready' && <button type="button" onClick={startTimer}>Start timer</button>}
+        {phase === 'expired' && <span role="status">Time is up. You can check your answers.</span>}
+      </div>
+
+      {result && (
+        <div className="ls-toolbar ls-result">
+          <strong>Score: {result.score}/{total}</strong>
+          {saveStatus === 'saving' && <span role="status">Saving…</span>}
+          {saveStatus === 'saved' && <span role="status">Saved to Practice history.</span>}
+          {saveStatus === 'error' && (
+            <>
+              <span role="alert">Could not save to Practice history.</span>
+              <button type="button" onClick={() => save(result)}>Retry save</button>
+            </>
+          )}
+        </div>
+      )}
+
+      <div className="ls-workspace">
+        <section className="ls-panel ls-player" aria-labelledby="ls-player-title">
+          <div className="ls-icon"><Headphones /></div>
+          <h2 id="ls-player-title">Audio player</h2>
+          <Waveform playing={playing} />
+          <p>
+            {phase === 'ready' ? 'Start the timer to unlock audio and answers.'
+              : phase === 'expired' ? 'Check your answers to unlock replay.'
+                : playing ? 'Playing audio…' : 'You can replay the audio during practice.'}
+          </p>
+          {playing ? (
+            <button type="button" onClick={stopAudio}>Stop audio</button>
+          ) : (
+            <button type="button" disabled={phase === 'expired'} onClick={playAudio}>
+              {phase === 'ready' ? 'Unlock audio' : result ? 'Replay audio' : '▶ Play audio'}
+            </button>
+          )}
+          {audioError && <p role="alert" className="ls-error">{audioError}</p>}
+          {result && (
+            <details className="ls-transcript">
+              <summary>Read transcript</summary>
+              {practice.dialogue.map(([speaker, line], index) => (
+                <p key={index}><strong>{speaker}:</strong> {line}</p>
+              ))}
+            </details>
+          )}
+        </section>
+
+        <form className="ls-panel" onSubmit={submit} aria-labelledby="ls-question-title">
+          <h2 id="ls-question-title">Practice questions</h2>
+          {phase === 'ready' && <p className="ls-muted">Answer fields unlock after you start the timer.</p>}
+
+          {practice.questions.map((question, index) => {
+            const id = `ls-q-${index}`;
+            const value = answers[index] ?? '';
+            const correct = Boolean(result && isCorrect(question, value));
+
+            return (
+              <section className="ls-question" key={id}>
+                <p className="ls-muted">{index + 1} of {total} · {question.type ?? 'Multiple choice'}</p>
+                <h3 id={`${id}-title`}>{question.prompt}</h3>
+                {question.options ? (
+                  <fieldset disabled={phase !== 'running'} aria-labelledby={`${id}-title`}>
+                    {question.options.map((option) => (
+                      <label key={option} className="ls-option">
+                        <input type="radio" name={id} checked={value === option}
+                          onChange={() => update(index, option)} />
+                        {option}
+                      </label>
+                    ))}
+                  </fieldset>
+                ) : (
+                  <>
+                    <label htmlFor={id} className="ls-muted">
+                      {question.limit ? `Answer · up to ${question.limit} words` : 'Fill in the blank'}
+                    </label>
+                    <input id={id} className="ls-text-input" type="text" value={value}
+                      disabled={phase !== 'running'} autoComplete="off" spellCheck={false} maxLength={100}
+                      aria-labelledby={`${id}-title`} onChange={(event) => update(index, event.target.value)} />
+                  </>
+                )}
+                {result && (
+                  <div className={`ls-feedback${correct ? ' ls-correct' : ''}`}>
+                    <strong>{correct ? 'Correct' : value.trim() ? 'Incorrect' : 'Unanswered'}</strong>
+                    <p>Your answer: {value.trim() || '—'}</p>
+                    {!correct && <p>Correct answer: <strong>{question.answer}</strong></p>}
+                    {question.explanation && <p>{question.explanation}</p>}
+                  </div>
+                )}
+              </section>
+            );
+          })}
+
+          {!result && <button type="submit" className="ls-submit">Check answers →</button>}
+        </form>
+      </div>
+
+      <dialog ref={timerDialog} className="ls-dialog" aria-labelledby="ls-dialog-title">
+        <h2 id="ls-dialog-title">Start the timer first</h2>
+        <p>You have {duration / 60} minutes to listen and answer.</p>
+        <div className="ls-dialog-actions">
+          <button type="button" onClick={startTimer}>Start timer</button>
+          <button type="button" className="ls-secondary" onClick={() => timerDialog.current?.close()}>Not yet</button>
+        </div>
+      </dialog>
+    </>
+  );
+}
+
+export default function Listening() {
+  const [page, setPage] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const heading = useRef(null);
+  const demoPlan = window.localStorage.getItem(DEMO_PLAN_KEY);
+  const unlockedSetCount = getUnlockedSetCount(demoPlan);
+  const pageCount = Math.ceil(SETS.length / PAGE_SIZE);
+  const startIndex = page * PAGE_SIZE;
+  const visibleSets = SETS.slice(startIndex, startIndex + PAGE_SIZE);
+
+  function goToPage(index) {
+    setPage(index);
+    heading.current?.focus({ preventScroll: true });
+    heading.current?.scrollIntoView({ block: 'start' });
+  }
+
+  return (
+    <div className="ls-page">
+      {selected ? (
+        <ListeningExercise
+          key={selected.id}
+          practice={selected}
+          onBack={() => setSelected(null)}
+        />
+      ) : (
+        <>
+          <ListeningHero />
+
+          <div className="ls-list-header">
+            <h2 ref={heading} tabIndex={-1}>Choose an audio practice</h2>
+            <p role="status">
+              {SETS.length} practice sets · Page {page + 1} of {pageCount}
+            </p>
+          </div>
+
+          <div className="ls-grid">
+            {visibleSets.map((practice, index) => {
+              const setIndex = startIndex + index;
+              const number = String(setIndex + 1).padStart(2, '0');
+              const requiredPlan = getRequiredPlan(setIndex);
+              const canAccess = setIndex < unlockedSetCount;
+              const planName = requiredPlan === 'trial' ? 'Free Trial' : PLAN_NAMES[requiredPlan];
+              const mixed = practice.questions.some((question) => !question.options);
+
+              return (
+                <article className="ls-card" key={practice.id}>
+                  <div className="ls-card-top">
+                    <div className="ls-icon"><Headphones /></div>
+                    <span>Practice {number} · {planName}</span>
+                  </div>
+
+                  <Waveform />
+                  <h3>{practice.title}</h3>
+                  <p>{practice.questions.length} questions · {practice.minutes ?? 8} min</p>
+                  <p>
+                    {mixed
+                      ? 'Multiple choice · Form completion · Short answer'
+                      : 'Multiple choice'}
+                  </p>
+
+                  <button
+                    type="button"
+                    aria-label={
+                      canAccess
+                        ? `Start listening: ${practice.title}`
+                        : `View ${planName} plan for ${practice.title}`
+                    }
+                    onClick={() => {
+                      if (!canAccess) {
+                        window.location.assign(`/plans#bb-plan-title-${requiredPlan}`);
+                        return;
+                      }
+
+                      setSelected(practice);
+                      window.scrollTo(0, 0);
+                    }}
+                  >
+                    {canAccess ? 'Start listening →' : `${planName} plan required →`}
+                  </button>
+                </article>
+              );
+            })}
+          </div>
+
+          <nav className="ls-pagination" aria-label="Listening practice pages">
+            <button
+              type="button"
+              className="ls-secondary"
+              disabled={page === 0}
+              onClick={() => goToPage(page - 1)}
+            >
+              ← Previous
+            </button>
+            <span>{page + 1} / {pageCount}</span>
+            <button
+              type="button"
+              className="ls-secondary"
+              disabled={page + 1 === pageCount}
+              onClick={() => goToPage(page + 1)}
+            >
+              Next →
+            </button>
+          </nav>
+        </>
+      )}
     </div>
   );
 }

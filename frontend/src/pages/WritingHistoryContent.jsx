@@ -32,6 +32,27 @@ const summaryCardStyle = {
   color: '#102e4a',
 };
 
+const attemptActionsStyle = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  gap: 8,
+};
+
+function getFeedbackUrl(attempt, question) {
+  if (attempt.status !== 'submitted' || !attempt.feedback || !question?.category) {
+    return null;
+  }
+
+  const params = new URLSearchParams({
+    category: question.category,
+    question: String(attempt.question_id),
+    attempt: String(attempt.id),
+  });
+
+  return `/writing/practice?${params.toString()}`;
+}
+
 function formatDate(value, dateOnly = false) {
   if (!value) return '—';
 
@@ -90,7 +111,6 @@ function HistorySummary({ counts, lastActivity }) {
 
 export default function WritingHistory() {
   const navigate = useNavigate();
-
   const [attempts, setAttempts] = useState([]);
   const [questions, setQuestions] = useState({});
   const [filter, setFilter] = useState('all');
@@ -145,9 +165,7 @@ export default function WritingHistory() {
     }
 
     loadHistory();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [navigate, retry]);
 
   const counts = {
@@ -203,9 +221,7 @@ export default function WritingHistory() {
     }
 
     loadQuestions();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [missingIds, loading, error, navigate]);
 
   function rememberSaved(saved) {
@@ -301,14 +317,15 @@ export default function WritingHistory() {
             <div className="wh-list">
               {visible.map((attempt) => {
                 const isDraft = attempt.status === 'draft';
+                const question = questions[attempt.id];
+                const title = question?.title || `Question ${attempt.question_id}`;
+                const feedbackUrl = getFeedbackUrl(attempt, question);
 
                 return (
                   <article className="wh-panel wh-attempt" key={attempt.id}>
                     <div>
                       <span className="wh-badge">{isDraft ? 'Draft' : 'Submitted'}</span>
-                      <h2>
-                        {questions[attempt.id]?.title || `Question ${attempt.question_id}`}
-                      </h2>
+                      <h2>{title}</h2>
                       <p className="wh-preview">{previewAnswer(attempt.answer)}</p>
                       <div className="wh-meta">
                         <span>{attempt.word_count ?? 0} words</span>
@@ -317,13 +334,25 @@ export default function WritingHistory() {
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      className="wh-button wh-outline"
-                      onClick={() => setSelectedId(attempt.id)}
-                    >
-                      {isDraft ? 'Continue draft' : 'Review answer'}
-                    </button>
+                    <div style={attemptActionsStyle}>
+                      <button
+                        type="button"
+                        className="wh-button wh-outline"
+                        onClick={() => setSelectedId(attempt.id)}
+                      >
+                        {isDraft ? 'Continue draft' : 'Review answer'}
+                      </button>
+
+                      {feedbackUrl && (
+                        <Link
+                          className="wh-button"
+                          to={feedbackUrl}
+                          aria-label={`View feedback for ${title}, attempt ${attempt.id}`}
+                        >
+                          View feedback →
+                        </Link>
+                      )}
+                    </div>
                   </article>
                 );
               })}
@@ -387,6 +416,7 @@ function SavedAnswer({ attemptId, onClose, onSaved }) {
   const readOnly = attempt?.status !== 'draft';
   const dirty = !readOnly && answer !== (attempt.answer ?? '');
   const wordCount = answer.trim() ? answer.trim().split(/\s+/).length : 0;
+  const feedbackUrl = attempt ? getFeedbackUrl(attempt, question) : null;
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -438,9 +468,7 @@ function SavedAnswer({ attemptId, onClose, onSaved }) {
     }
 
     loadAnswer();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [attemptId, retry]);
 
   useEffect(() => {
@@ -607,6 +635,14 @@ function SavedAnswer({ attemptId, onClose, onSaved }) {
 
           {error && <p role="alert">{error}</p>}
           {message && <p role="status">{message}</p>}
+
+          {feedbackUrl && (
+            <div className="wh-dialog-actions">
+              <Link className="wh-button" to={feedbackUrl} onClick={onClose}>
+                View feedback →
+              </Link>
+            </div>
+          )}
 
           {!readOnly && (
             <div className="wh-dialog-actions">

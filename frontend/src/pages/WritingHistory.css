@@ -277,3 +277,8 @@
     font-size: 21px;
   }
 }
+
+/* The shared practice layout already provides the top bar and navigation. */
+.bb-practice-workspace .wh-header {
+  display: none;
+}

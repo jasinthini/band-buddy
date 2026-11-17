@@ -562,3 +562,217 @@
     transform: translateY(0);
   }
 }
+
+
+
+
+
+.bl-page.bl-register-page .bl-main {
+  display: grid;
+  place-items: center;
+  padding: 32px clamp(16px, 5vw, 72px) 56px;
+}
+
+.bl-page.bl-register-page .bl-main > .bl-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 46fr) minmax(0, 54fr);
+  align-items: stretch;
+  gap: 0;
+  width: min(100%, 1180px);
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #a6c8eb;
+  border-radius: 26px;
+  box-shadow: 0 24px 64px rgb(16 47 74 / 12%);
+}
+
+.bl-page.bl-register-page .bl-layout > .bl-form-section,
+.bl-page.bl-register-page .bl-layout > .bl-art-section {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+  padding: clamp(24px, 4vw, 54px);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.bl-page.bl-register-page .bl-layout > .bl-form-section {
+  grid-column: 1;
+  grid-row: 1;
+  background: #fff;
+}
+
+.bl-page.bl-register-page .bl-layout > .bl-art-section {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  background: linear-gradient(145deg, #edf7ff, #d1e8f9);
+}
+
+.bl-page.bl-register-page .bl-art-section .bl-illustration {
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  margin: 0;
+  object-fit: contain;
+}
+
+@media (max-width: 760px) {
+  .bl-page.bl-register-page .bl-main > .bl-layout {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 480px;
+  }
+
+  .bl-page.bl-register-page .bl-layout > .bl-art-section {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .bl-page.bl-register-page .bl-art-section .bl-illustration {
+    max-width: 300px;
+  }
+}
+
+
+.bl-page.bl-login-page .bl-main {
+  padding: clamp(24px, 5vw, 72px);
+  background: #d5f1ff url('/images/login-background.png')
+    center center / cover no-repeat;
+}
+
+.bl-page.bl-login-page .bl-main > .bl-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 460px) minmax(0, 1fr);
+  align-items: center;
+  width: min(100%, 1260px);
+  max-width: 1260px;
+  margin-inline: auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.bl-page.bl-login-page .bl-layout > .bl-form-section {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  padding: clamp(22px, 3vw, 44px);
+  background: #fff;
+  border: 1px solid #c2daec;
+  border-radius: 24px;
+  box-shadow: 0 16px 42px rgb(16 47 74 / 14%);
+}
+
+/* The student is already in the new background artwork. */
+.bl-page.bl-login-page .bl-art-section,
+.bl-page.bl-login-page .bl-wave {
+  display: none;
+}
+
+.bl-page.bl-login-page .bl-login-footer {
+  padding: 20px 16px;
+  background: #102f4a;
+  color: #fff;
+  text-align: center;
+  font-weight: 700;
+}
+
+@media (max-width: 800px) {
+  .bl-page.bl-login-page .bl-main {
+    padding: 28px 16px;
+    background-position: left center;
+  }
+
+  .bl-page.bl-login-page .bl-main > .bl-layout {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 460px;
+  }
+}
+
+
+.bl-page.bl-login-page .bl-main {
+  background: #e6f4ff url('/images/login-background.png')
+    center / cover no-repeat;
+}
+
+.bl-page.bl-login-page .bl-main > .bl-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  width: min(100%, 1000px);
+  margin-inline: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #b7d6ef;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 16px 42px rgb(16 47 74 / 14%);
+}
+
+.bl-page.bl-login-page .bl-layout > .bl-form-section {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.bl-page.bl-login-page .bl-layout > .bl-art-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 24px;
+  background: linear-gradient(145deg, #eaf7ff, #c1e3fa);
+  text-align: center;
+}
+
+.bl-page.bl-login-page .bl-art-section .bl-illustration {
+  width: min(100%, 360px);
+  height: auto;
+  max-height: 420px;
+  margin: 0;
+  object-fit: contain;
+}
+
+@media (max-width: 800px) {
+  .bl-page.bl-login-page .bl-main > .bl-layout {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 460px;
+  }
+
+  .bl-page.bl-login-page .bl-layout > .bl-art-section {
+    display: none;
+  }
+}
+
+
+
+@media (min-width: 801px) {
+  .bl-page.bl-login-page .bl-main {
+    padding-block: clamp(20px, 3vh, 36px);
+  }
+
+  .bl-page.bl-login-page .bl-layout > .bl-form-section {
+    padding-block: clamp(22px, 3vh, 36px);
+  }
+
+  .bl-page.bl-login-page .bl-art-section .bl-illustration {
+    max-height: min(360px, 42vh);
+  }
+}

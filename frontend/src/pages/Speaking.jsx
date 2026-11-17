@@ -1,147 +1,46 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import SpeakingPracticeSave from '../components/SpeakingPracticeSave';
+import SpeakingFeedback from './SpeakingFeedback';
 import './Speaking.css';
 
 const TOKEN_KEY = 'band_buddy_access_token';
-const COACH_IMAGE = '/images/login-student.png';
+const PART_KEYS = ['part1', 'part2', 'part3'];
 const WAVE_HEIGHTS = [14, 22, 34, 48, 27, 60, 44, 25, 37, 52, 30, 20, 35, 48, 26, 17];
 
-const PARTS = {
-  part1: {
-    label: 'Part 1',
-    title: 'Familiar topics',
-    tip: 'Answer naturally. Add a reason or a short example.',
-    topics: [
-      {
-        title: 'Your hometown',
-        prompt: 'What do you like most about the place where you live?',
-        points: [
-          'Has your hometown changed in recent years?',
-          'Would you like to live there in the future?',
-        ],
-      },
-      {
-        title: 'Your daily routine',
-        prompt: 'Talk about your usual daily activities.',
-        points: [
-          'What do you usually do in the morning?',
-          'What is your favourite time of day?',
-          'Would you like to change your routine?',
-        ],
-      },
-      {
-        title: 'Learning English',
-        prompt: 'Talk about your experience of learning English.',
-        points: [
-          'When did you start learning English?',
-          'What do you enjoy about learning it?',
-          'How do you practise outside class?',
-        ],
-      },
-    ],
-  },
-  part2: {
-    label: 'Part 2',
-    title: 'Long turn',
-    tip: 'Take a little time to plan. Try speaking for one to two minutes.',
-    topics: [
-      {
-        title: 'A place you enjoy visiting',
-        prompt: 'Describe a place you enjoy visiting in your free time.',
-        points: [
-          'Where the place is.',
-          'When you usually go there.',
-          'What you do there.',
-          'Explain why you enjoy visiting this place.',
-        ],
-      },
-      {
-        title: 'A skill you would like to learn',
-        prompt: 'Describe a skill you would like to learn in the future.',
-        points: [
-          'What the skill is.',
-          'Why you want to learn it.',
-          'How you would learn it.',
-          'Explain how this skill could help you.',
-        ],
-      },
-      {
-        title: 'Someone who helped you',
-        prompt: 'Describe a person who helped you during a difficult time.',
-        points: [
-          'Who the person is.',
-          'What the situation was.',
-          'How the person helped you.',
-          'Explain how you felt afterwards.',
-        ],
-      },
-    ],
-  },
-  part3: {
-    label: 'Part 3',
-    title: 'Discussion',
-    tip: 'Explain your views and support them with reasons or examples.',
-    topics: [
-      {
-        title: 'Technology and learning',
-        prompt: 'Discuss how technology affects the way people learn.',
-        points: [
-          'How has technology changed education?',
-          'What are the limits of learning online?',
-          'Will teachers remain important in the future?',
-        ],
-      },
-      {
-        title: 'Cities and communities',
-        prompt: 'Discuss life in cities and local communities.',
-        points: [
-          'Why do many people move to cities?',
-          'How can cities become better places to live?',
-          'What helps people feel part of a community?',
-        ],
-      },
-      {
-        title: 'Work and personal time',
-        prompt: 'Discuss the relationship between work and personal life.',
-        points: [
-          'Why do some people work very long hours?',
-          'How can employers support a better work-life balance?',
-          'Will working patterns change in the future?',
-        ],
-      },
-    ],
-  },
+const cardGrid = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 230px), 1fr))',
+  gap: 16,
+  marginBlock: '16px 28px',
 };
 
-function formatClock(seconds) {
+function clock(seconds) {
   return [Math.floor(seconds / 60), seconds % 60]
-    .map((value) => String(value).padStart(2, '0'))
+    .map((number) => String(number).padStart(2, '0'))
     .join(':');
 }
 
-function getExtension(type) {
+function fileExtension(type) {
   if (type.includes('mp4')) return 'm4a';
   if (type.includes('ogg')) return 'ogg';
+  if (type.includes('wav')) return 'wav';
   return 'webm';
 }
 
 function releaseRecording(session) {
   if (!session) return;
 
-  window.clearInterval(session.timer);
-
-  const recorder = session.recorder;
+  const { recorder, stream } = session;
   if (recorder) {
     recorder.ondataavailable = null;
     recorder.onstop = null;
     recorder.onerror = null;
-
     if (recorder.state !== 'inactive') recorder.stop();
   }
 
-  session.stream?.getTracks().forEach((track) => track.stop());
+  stream?.getTracks().forEach((track) => track.stop());
 }
 
 function MicIcon({ recording }) {
@@ -166,162 +65,178 @@ function MicIcon({ recording }) {
   );
 }
 
-export default function Speaking() {
-  const navigate = useNavigate();
-  const [ready, setReady] = useState(false);
-  const [authError, setAuthError] = useState('');
-  const [retry, setRetry] = useState(0);
-  const [part, setPart] = useState('part1');
+function PracticeSession({ part, config, topic, onBack, onFeedback, feedbackOpen }) {
+  const cueCard = part === 'part2';
+  const questions = cueCard ? [topic.prompt] : [topic.prompt, ...topic.points];
+
   const [index, setIndex] = useState(0);
+  const [timing, setTiming] = useState('idle');
+  const [remaining, setRemaining] = useState(config.practice_seconds);
   const [phase, setPhase] = useState('idle');
-  const [seconds, setSeconds] = useState(0);
-  const [clip, setClip] = useState(null);
+  const [recordedSeconds, setRecordedSeconds] = useState(0);
+  const [transcribing, setTranscribing] = useState(false);
+  const [recordings, setRecordings] = useState({});
+  const [transcripts, setTranscripts] = useState({});
   const [error, setError] = useState('');
+  const [transcriptError, setTranscriptError] = useState('');
 
+  const timerRef = useRef(null);
   const sessionRef = useRef(null);
-  const clipUrlRef = useRef('');
+  const urlsRef = useRef(new Set());
+  const requestRef = useRef(null);
+  const dialogRef = useRef(null);
   const headingRef = useRef(null);
-  const focusTopicRef = useRef(false);
 
-  const current = PARTS[part];
-  const topic = current.topics[index];
+  const clip = recordings[index];
+  const transcript = transcripts[index];
   const recording = phase === 'recording';
   const locked = phase !== 'idle';
 
   useEffect(() => {
-    if (!sessionStorage.getItem(TOKEN_KEY)) {
-      navigate('/login', { replace: true });
-      return;
-    }
-
-    let active = true;
-
-    async function checkLogin() {
-      try {
-        await api.get('/auth/me');
-        if (active) setReady(true);
-      } catch (err) {
-        if (!active) return;
-
-        if (err.response?.status === 401) {
-          sessionStorage.removeItem(TOKEN_KEY);
-          navigate('/login', { replace: true });
-        } else {
-          setAuthError('Could not open speaking practice. Please try again.');
-        }
-      }
-    }
-
-    checkLogin();
-
-    return () => {
-      active = false;
-    };
-  }, [navigate, retry]);
+    if (!feedbackOpen) headingRef.current?.focus();
+  }, [index, feedbackOpen]);
 
   useEffect(() => {
-    return () => {
-      const session = sessionRef.current;
-      sessionRef.current = null;
-      releaseRecording(session);
-
-      if (clipUrlRef.current) {
-        URL.revokeObjectURL(clipUrlRef.current);
-        clipUrlRef.current = '';
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!locked && !clip) return;
+    const urls = urlsRef.current;
 
     function warnBeforeLeaving(event) {
+      if (!sessionRef.current && urls.size === 0) return;
       event.preventDefault();
       event.returnValue = '';
     }
 
     window.addEventListener('beforeunload', warnBeforeLeaving);
-    return () => window.removeEventListener('beforeunload', warnBeforeLeaving);
-  }, [locked, clip]);
+
+    return () => {
+      window.removeEventListener('beforeunload', warnBeforeLeaving);
+
+      const session = sessionRef.current;
+      sessionRef.current = null;
+      releaseRecording(session);
+
+      requestRef.current?.abort();
+      requestRef.current = null;
+      urls.forEach((url) => URL.revokeObjectURL(url));
+      urls.clear();
+    };
+  }, []);
 
   useEffect(() => {
-    if (!focusTopicRef.current) return;
-    focusTopicRef.current = false;
-    headingRef.current?.focus();
-  }, [part, index]);
+    function tick() {
+      const timer = timerRef.current;
+      if (!timer) return;
 
-  function clearClip() {
-    if (clipUrlRef.current) {
-      URL.revokeObjectURL(clipUrlRef.current);
-      clipUrlRef.current = '';
+      const now = Date.now();
+      const session = sessionRef.current;
+
+      if (now >= timer.endsAt) {
+        setTiming('ended');
+        setRemaining(0);
+
+        if (session?.recorder?.state === 'recording') {
+          session.stoppedAt = timer.endsAt;
+          setPhase('stopping');
+          session.recorder.stop();
+        } else if (session && !session.recorder) {
+          sessionRef.current = null;
+          releaseRecording(session);
+          setPhase('idle');
+        }
+
+        return;
+      }
+
+      if (session?.startedAt && session.stoppedAt == null) {
+        setRecordedSeconds(Math.floor((now - session.startedAt) / 1000));
+      }
+
+      const preparing = now < timer.prepEndsAt;
+      setTiming(preparing ? 'preparing' : 'speaking');
+
+      const deadline = preparing ? timer.prepEndsAt : timer.endsAt;
+      setRemaining(Math.ceil((deadline - now) / 1000));
     }
 
-    setClip(null);
-    setSeconds(0);
+    const interval = window.setInterval(tick, 200);
+    document.addEventListener('visibilitychange', tick);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', tick);
+    };
+  }, []);
+
+  function startTimer() {
+    if (timerRef.current) return;
+
+    const prep = config.preparation_seconds;
+    const prepEndsAt = Date.now() + prep * 1000;
+
+    timerRef.current = {
+      prepEndsAt,
+      endsAt: prepEndsAt + config.practice_seconds * 1000,
+    };
+
+    dialogRef.current?.close();
     setError('');
+    setTiming(prep ? 'preparing' : 'speaking');
+    setRemaining(prep || config.practice_seconds);
   }
 
-  function confirmDiscard() {
-    return (
-      !clipUrlRef.current ||
-      window.confirm(
-        'Download your recording if you want to keep it. Continue and discard this recording?'
-      )
-    );
-  }
-
-  function selectPart(key) {
-    if (key === part || sessionRef.current || !confirmDiscard()) return;
-
-    clearClip();
-    focusTopicRef.current = true;
-    setPart(key);
-    setIndex(0);
-  }
-
-  function moveTopic(nextIndex) {
-    if (
-      nextIndex < 0 ||
-      nextIndex >= current.topics.length ||
-      sessionRef.current ||
-      !confirmDiscard()
-    ) return;
-
-    clearClip();
-    focusTopicRef.current = true;
-    setIndex(nextIndex);
-  }
-
-  function leaveDashboard(event) {
-    event.preventDefault();
-
-    if (sessionRef.current) {
-      setError('Wait for microphone access or stop recording before leaving.');
-      return;
-    }
-
-    if (confirmDiscard()) navigate('/dashboard');
+  function canRecordNow() {
+    const timer = timerRef.current;
+    const now = Date.now();
+    return Boolean(timer && now >= timer.prepEndsAt && now < timer.endsAt);
   }
 
   async function startRecording() {
-    if (sessionRef.current || !confirmDiscard()) return;
+    if (sessionRef.current || requestRef.current) return;
+
+    if (!timerRef.current) {
+      dialogRef.current?.showModal();
+      return;
+    }
+
+    if (!canRecordNow()) {
+      setError(
+        Date.now() < timerRef.current.prepEndsAt
+          ? 'Wait until the preparation timer finishes.'
+          : 'Time is up for this practice set.'
+      );
+      return;
+    }
 
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
       setError('Microphone recording requires a supported browser on localhost or HTTPS.');
       return;
     }
 
+    if (clip && !window.confirm('Replace the recording for this question?')) return;
+
+    if (!canRecordNow()) {
+      setError('Time is up for this practice set.');
+      return;
+    }
+
     const session = {
-      recorder: null,
       stream: null,
-      timer: null,
+      recorder: null,
       startedAt: 0,
       stoppedAt: null,
     };
 
     sessionRef.current = session;
-    setError('');
     setPhase('requesting');
+    setError('');
+
+    function fail(message) {
+      if (sessionRef.current !== session) return;
+      sessionRef.current = null;
+      releaseRecording(session);
+      setPhase('idle');
+      setRecordedSeconds(clip?.seconds ?? 0);
+      setError(message);
+    }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -333,313 +248,577 @@ export default function Speaking() {
 
       session.stream = stream;
 
-      const preferredType = [
-        'audio/webm;codecs=opus',
-        'audio/webm',
-        'audio/mp4',
-      ].find((type) => MediaRecorder.isTypeSupported?.(type));
+      if (!canRecordNow()) {
+        fail('Time is up for this practice set.');
+        return;
+      }
 
-      const recorder = preferredType
-        ? new MediaRecorder(stream, { mimeType: preferredType })
+      const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4']
+        .find((type) => MediaRecorder.isTypeSupported?.(type));
+
+      const recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
         : new MediaRecorder(stream);
 
-      session.recorder = recorder;
       const chunks = [];
+      session.recorder = recorder;
 
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) chunks.push(event.data);
       };
 
-      recorder.onerror = () => {
-        if (sessionRef.current !== session) return;
-
-        sessionRef.current = null;
-        releaseRecording(session);
-        setPhase('idle');
-        setError('Recording failed. Please try again.');
-      };
+      recorder.onerror = () => fail('Recording failed. Please try again.');
 
       recorder.onstop = () => {
         if (sessionRef.current !== session) return;
 
-        const finishedAt = session.stoppedAt ?? Date.now();
-        const duration = Math.max(0, Math.floor((finishedAt - session.startedAt) / 1000));
+        const finishedAt = Math.min(
+          session.stoppedAt ?? Date.now(),
+          timerRef.current.endsAt
+        );
 
-        sessionRef.current = null;
-        releaseRecording(session);
-        setPhase('idle');
-        setSeconds(duration);
+        const seconds = Math.max(
+          0,
+          Math.floor((finishedAt - session.startedAt) / 1000)
+        );
 
         const type = recorder.mimeType || chunks[0]?.type || 'audio/webm';
         const blob = new Blob(chunks, { type });
 
         if (!blob.size) {
-          setError('No audio was captured. Please try again.');
+          fail('No audio was captured. Please try again.');
           return;
         }
 
+        sessionRef.current = null;
+        releaseRecording(session);
+        setPhase('idle');
+
+        if (clip) {
+          URL.revokeObjectURL(clip.url);
+          urlsRef.current.delete(clip.url);
+        }
+
         const url = URL.createObjectURL(blob);
-        clipUrlRef.current = url;
-        setClip({
-          url,
-          extension: getExtension(type),
-          title: topic.title,
-          seconds: duration,
+        urlsRef.current.add(url);
+
+        setRecordings((old) => ({
+          ...old,
+          [index]: { url, blob, seconds, extension: fileExtension(type) },
+        }));
+
+        setTranscripts((old) => {
+          const next = { ...old };
+          delete next[index];
+          return next;
         });
+
+        setTranscriptError('');
+        setRecordedSeconds(seconds);
       };
 
-      recorder.start();
       session.startedAt = Date.now();
-      clearClip();
+      recorder.start();
+      setRecordedSeconds(0);
       setPhase('recording');
-
-      session.timer = window.setInterval(() => {
-        setSeconds(Math.floor((Date.now() - session.startedAt) / 1000));
-      }, 250);
     } catch (err) {
-      if (sessionRef.current !== session) return;
-
-      sessionRef.current = null;
-      releaseRecording(session);
-      setPhase('idle');
-
-      if (err.name === 'NotAllowedError') {
-        setError('Microphone access was blocked. Allow it in your browser and try again.');
-      } else if (err.name === 'NotFoundError') {
-        setError('No microphone was found. Connect one and try again.');
-      } else {
-        setError('Could not start recording. Check your microphone and try again.');
-      }
+      fail(
+        err.name === 'NotAllowedError'
+          ? 'Allow microphone access in your browser and try again.'
+          : err.name === 'NotFoundError'
+            ? 'No microphone was found. Connect one and try again.'
+            : 'Could not start recording. Check your microphone and try again.'
+      );
     }
   }
 
   function stopRecording() {
     const session = sessionRef.current;
-    if (!session?.recorder || session.recorder.state === 'inactive') return;
+    if (session?.recorder?.state !== 'recording') return;
 
-    session.stoppedAt = Date.now();
-    window.clearInterval(session.timer);
+    session.stoppedAt = Math.min(Date.now(), timerRef.current.endsAt);
     setPhase('stopping');
     session.recorder.stop();
   }
 
-  if (!ready) {
-    return (
-      <main className="sp-page sp-loading">
-        <h1>Speaking practice</h1>
+  async function generateTranscript() {
+    if (!clip || sessionRef.current || requestRef.current || transcript) return;
 
-        {authError ? (
-          <>
-            <p role="alert">{authError}</p>
-            <button
-              type="button"
-              className="sp-button"
-              onClick={() => {
-                setAuthError('');
-                setRetry((value) => value + 1);
-              }}
-            >
-              Try again
-            </button>
-          </>
-        ) : (
-          <p role="status">Opening your practice space…</p>
-        )}
-      </main>
-    );
+    const request = new AbortController();
+    requestRef.current = request;
+    setTranscribing(true);
+    setTranscriptError('');
+
+    const form = new FormData();
+    form.append('audio', clip.blob, `recording.${clip.extension}`);
+
+    try {
+      const { data } = await api.post('/speaking/transcribe', form, {
+        signal: request.signal,
+        timeout: 60000,
+      });
+
+      if (request.signal.aborted) return;
+
+      const text = typeof data?.transcript === 'string'
+        ? data.transcript.trim()
+        : '';
+
+      if (text) {
+        setTranscripts((old) => ({ ...old, [index]: text }));
+      } else {
+        setTranscriptError('No transcript was returned. Please try again.');
+      }
+    } catch (err) {
+      if (request.signal.aborted) return;
+
+      const detail = err.response?.data?.detail;
+
+      setTranscriptError(
+        err.response?.status === 401
+          ? 'Your session expired. Please log in again.'
+          : typeof detail === 'string'
+            ? detail
+            : 'Could not generate the transcript. Please try again.'
+      );
+    } finally {
+      if (requestRef.current === request) {
+        requestRef.current = null;
+        setTranscribing(false);
+      }
+    }
   }
 
-  const status = phase === 'requesting'
-    ? 'Allow microphone access in your browser.'
-    : recording
-      ? 'Recording… Press Stop recording when you finish.'
-      : phase === 'stopping'
-        ? 'Preparing playback…'
-        : clip
-          ? 'Your recording is ready. Listen below or save this practice.'
-          : 'Tap the microphone when you are ready to speak.';
+  function moveQuestion(next) {
+    if (sessionRef.current || requestRef.current || next < 0 || next >= questions.length) {
+      return;
+    }
+
+    setIndex(next);
+    setRecordedSeconds(recordings[next]?.seconds ?? 0);
+    setError('');
+    setTranscriptError('');
+  }
+
+  function leavePractice() {
+    if (sessionRef.current || requestRef.current) return;
+
+    if (
+      urlsRef.current.size &&
+      !window.confirm('Download any recordings you want to keep. Leave this practice set?')
+    ) {
+      return;
+    }
+
+    onBack();
+  }
+
+  const timerLabel = {
+    idle: 'Practice time',
+    preparing: 'Preparation time left',
+    speaking: 'Speaking time left',
+    ended: 'Time is up',
+  }[timing];
+
+  const recordLabel = {
+    idle: clip ? 'Record again' : 'Start recording',
+    requesting: 'Opening microphone…',
+    recording: 'Stop recording',
+    stopping: 'Finishing recording…',
+  }[phase];
+
+  const recordDisabled = !recording && (
+    locked || transcribing || timing === 'preparing' || timing === 'ended'
+  );
+
+  const recordAction = recording ? stopRecording : startRecording;
 
   return (
-    <div className="sp-page">
-      <header className="sp-header">
-        <div className="sp-shell sp-navigation">
-          <Link to="/dashboard" aria-label="Band Buddy dashboard" onClick={leaveDashboard}>
-            <img src="/images/logo.png" alt="Band Buddy" />
-          </Link>
+    <>
+      <div className="sp-studio-actions" style={{ marginBlock: 16 }}>
+        <button
+          type="button"
+          className="sp-button sp-outline"
+          disabled={locked || transcribing}
+          onClick={leavePractice}
+        >
+          ← Back to topics
+        </button>
+      </div>
 
-          <Link to="/dashboard" onClick={leaveDashboard}>
-            ← Back to dashboard
-          </Link>
-        </div>
-      </header>
-
-      <main className="sp-shell sp-main sp-studio">
-        <section className="sp-studio-hero" aria-labelledby="speaking-title">
-          <div>
-            <p className="sp-eyebrow">BAND BUDDY · IELTS PRACTICE</p>
-            <h1 id="speaking-title">Speaking practice</h1>
-            <p>Build confidence, one answer at a time.</p>
+      <div className="sp-studio-grid">
+        <section className="sp-studio-panel" aria-labelledby="sp-topic-title">
+          <div className="sp-coach-note">
+            <img src="/images/login-student.png" alt="" />
+            <div>
+              <p className="sp-eyebrow">{config.label} · YOUR SPEAKING PROMPT</p>
+              <h2 id="sp-topic-title">{topic.title}</h2>
+              <p>{config.tip}</p>
+            </div>
           </div>
-          <img src="/images/speaking-conversation.png" alt="" />
-        </section>
 
-        <div className="sp-part-switch" role="group" aria-label="Speaking part">
-          {Object.entries(PARTS).map(([key, item]) => (
-            <button
-              key={key}
-              type="button"
-              aria-pressed={part === key}
-              disabled={locked}
-              onClick={() => selectPart(key)}
-            >
-              <strong>{item.label}</strong>
-              <span>{item.title}</span>
-            </button>
-          ))}
-        </div>
+          <div className="sp-prompt-box">
+            <p className="sp-topic-number">
+              {cueCard ? 'Cue card' : `Question ${index + 1} of ${questions.length}`}
+            </p>
 
-        <div className="sp-studio-grid">
-          <section className="sp-studio-panel" aria-labelledby="sp-topic-title">
-            <div className="sp-coach-note">
-              <img src={COACH_IMAGE} alt="" />
-              <div>
-                <p className="sp-eyebrow">YOUR SPEAKING PROMPT</p>
-                <h2 id="sp-topic-title" ref={headingRef} tabIndex={-1}>
-                  {topic.title}
-                </h2>
-                <p>{current.tip}</p>
-              </div>
-            </div>
+            <h3 ref={headingRef} tabIndex={-1}>{questions[index]}</h3>
 
-            <div className="sp-prompt-box">
-              <p className="sp-topic-number">
-                Topic {index + 1} of {current.topics.length}
-              </p>
-              <h3>{topic.prompt}</h3>
+            {cueCard && (
               <ul className="sp-points">
-                {topic.points.map((point) => <li key={point}>{point}</li>)}
+                {topic.points.map((point, number) => <li key={number}>{point}</li>)}
               </ul>
+            )}
+          </div>
+
+          <div className="sp-record-box" style={{ marginBlock: 14 }}>
+            <div className="sp-studio-actions">
+              <strong role="status">{timerLabel}</strong>
+              <span className="sp-studio-clock" role="timer">{clock(remaining)}</span>
+
+              {timing === 'idle' && (
+                <button type="button" className="sp-button" onClick={startTimer}>
+                  Start timer
+                </button>
+              )}
             </div>
 
-            <div className="sp-record-box">
-              <div className="sp-record-row">
-                <button
-                  type="button"
-                  className="sp-mic-control"
-                  disabled={locked && !recording}
-                  onClick={recording ? stopRecording : startRecording}
-                  aria-label={
-                    recording ? 'Stop recording' : clip ? 'Record again' : 'Start recording'
-                  }
-                >
-                  <MicIcon recording={recording} />
-                </button>
+            {timing === 'idle' && <p>Start the timer before recording.</p>}
+            {timing === 'preparing' && <p>Recording opens when preparation ends.</p>}
+            {timing === 'ended' && <p>You can still listen to, save or transcribe your recordings.</p>}
+          </div>
 
-                <div
-                  className={`sp-wave${recording ? ' sp-wave-live' : ''}`}
-                  aria-hidden="true"
-                >
-                  {WAVE_HEIGHTS.map((height, bar) => (
-                    <span
-                      key={bar}
-                      style={{
-                        height: `${height}%`,
-                        animationDelay: `${bar * 45}ms`,
-                      }}
-                    />
-                  ))}
-                </div>
+          <div className="sp-record-box">
+            <div className="sp-record-row">
+              <button
+                type="button"
+                className="sp-mic-control"
+                onClick={recordAction}
+                disabled={recordDisabled}
+                aria-label={recordLabel}
+              >
+                <MicIcon recording={recording} />
+              </button>
 
-                <span className="sp-studio-clock" aria-label={`Recording time: ${formatClock(seconds)}`}>
-                  {formatClock(seconds)}
-                </span>
+              <div className={`sp-wave${recording ? ' sp-wave-live' : ''}`} aria-hidden="true">
+                {WAVE_HEIGHTS.map((height, bar) => (
+                  <span
+                    key={bar}
+                    style={{ height: `${height}%`, animationDelay: `${bar * 45}ms` }}
+                  />
+                ))}
               </div>
 
-              <p className="sp-record-status" role="status">{status}</p>
-
-              <div className="sp-studio-actions">
-                {recording ? (
-                  <button type="button" className="sp-button" onClick={stopRecording}>
-                    Stop recording
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="sp-button"
-                    disabled={locked}
-                    onClick={startRecording}
-                  >
-                    {phase === 'requesting' ? 'Opening microphone…'
-                      : phase === 'stopping' ? 'Finishing recording…'
-                        : clip ? 'Record again' : 'Start recording'}
-                  </button>
-                )}
-              </div>
-
-              {error && <p className="sp-error" role="alert">{error}</p>}
-
-              {clip && (
-                <div className="sp-playback">
-                  <audio
-                    key={clip.url}
-                    controls
-                    preload="metadata"
-                    src={clip.url}
-                    aria-label="Listen to your recorded answer"
-                  />
-
-                  <SpeakingPracticeSave
-                    key={`save-${clip.url}`}
-                    title={clip.title}
-                    seconds={clip.seconds}
-                  />
-
-                  <a
-                    className="sp-button sp-outline"
-                    href={clip.url}
-                    download={`band-buddy-${part}-topic-${index + 1}.${clip.extension}`}
-                  >
-                    Download recording
-                  </a>
-                </div>
-              )}
+              <span
+                className="sp-studio-clock"
+                aria-label={`Recording time: ${clock(recordedSeconds)}`}
+              >
+                {clock(recordedSeconds)}
+              </span>
             </div>
 
             <div className="sp-studio-actions">
               <button
                 type="button"
-                className="sp-button sp-outline"
-                disabled={locked || index === 0}
-                onClick={() => moveTopic(index - 1)}
+                className="sp-button"
+                disabled={recordDisabled}
+                onClick={recordAction}
               >
-                ← Previous topic
+                {recordLabel}
+              </button>
+            </div>
+
+            {error && <p className="sp-error" role="alert">{error}</p>}
+
+            {clip && !locked && (
+              <div className="sp-playback">
+                <audio
+                  key={clip.url}
+                  src={clip.url}
+                  controls
+                  preload="metadata"
+                  aria-label="Listen to your recorded answer"
+                />
+
+                <SpeakingPracticeSave
+                  key={clip.url}
+                  title={cueCard ? topic.title : `${topic.title} · Question ${index + 1}`}
+                  seconds={clip.seconds}
+                />
+
+                <a
+                  className="sp-button sp-outline"
+                  href={clip.url}
+                  download={`band-buddy-${topic.slug}-answer-${index + 1}.${clip.extension}`}
+                >
+                  Download recording
+                </a>
+              </div>
+            )}
+          </div>
+
+          {!cueCard && (
+            <div className="sp-studio-actions" style={{ marginTop: 16 }}>
+              <button
+                type="button"
+                className="sp-button sp-outline"
+                disabled={locked || transcribing || index === 0}
+                onClick={() => moveQuestion(index - 1)}
+              >
+                ← Previous question
               </button>
 
               <button
                 type="button"
                 className="sp-button"
-                disabled={locked || index === current.topics.length - 1}
-                onClick={() => moveTopic(index + 1)}
+                disabled={locked || transcribing || index === questions.length - 1}
+                onClick={() => moveQuestion(index + 1)}
               >
-                Next topic →
+                Next question →
               </button>
             </div>
-          </section>
+          )}
+        </section>
 
-          <aside className="sp-studio-panel sp-transcript" aria-labelledby="sp-transcript-title">
-            <div className="sp-transcript-heading">
-              <h2 id="sp-transcript-title">Transcript</h2>
-              <span>Coming soon</span>
+        <aside
+          className="sp-studio-panel sp-transcript"
+          aria-labelledby="sp-transcript-title"
+          aria-busy={transcribing}
+        >
+          <div className="sp-transcript-heading">
+            <h2 id="sp-transcript-title">Transcript</h2>
+          </div>
+
+          <p>Record an English answer, then generate its transcript.</p>
+
+          <button
+            type="button"
+            className="sp-button"
+            disabled={!clip || locked || transcribing || Boolean(transcript)}
+            onClick={generateTranscript}
+          >
+            {transcribing ? 'Transcribing…' : transcript ? 'Transcript ready' : 'Generate transcript'}
+          </button>
+
+          {transcriptError && <p className="sp-error" role="alert">{transcriptError}</p>}
+
+          {transcript && (
+            <>
+              <p role="status" style={{ overflowWrap: 'anywhere' }}>{transcript}</p>
+              <button
+                type="button"
+                className="sp-button"
+                disabled={locked || transcribing}
+                onClick={() => onFeedback({
+                  title: topic.title,
+                  question: questions[index],
+                  transcript,
+                })}
+              >
+                Get feedback →
+              </button>
+            </>
+          )}
+        </aside>
+      </div>
+
+      <dialog
+        ref={dialogRef}
+        aria-labelledby="sp-timer-dialog-title"
+        style={{
+          width: 'min(420px, calc(100% - 32px))',
+          border: '1px solid #c7ddef',
+          borderRadius: 18,
+          padding: 24,
+          color: '#102b50',
+        }}
+      >
+        <h2 id="sp-timer-dialog-title">Start the timer first</h2>
+        <p>Start the timer to begin your practice.</p>
+
+        <div className="sp-studio-actions">
+          <button type="button" className="sp-button" onClick={startTimer}>
+            Start timer
+          </button>
+
+          <button
+            type="button"
+            className="sp-button sp-outline"
+            onClick={() => dialogRef.current?.close()}
+          >
+            Not yet
+          </button>
+        </div>
+      </dialog>
+    </>
+  );
+}
+
+export default function Speaking() {
+  const navigate = useNavigate();
+  const [parts, setParts] = useState(null);
+  const [part, setPart] = useState('part1');
+  const [topicId, setTopicId] = useState(null);
+  const [feedback, setFeedback] = useState(null);
+  const [error, setError] = useState('');
+  const [retry, setRetry] = useState(0);
+
+  useEffect(() => {
+    if (!sessionStorage.getItem(TOKEN_KEY)) {
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    const controller = new AbortController();
+
+    async function loadTopics() {
+      try {
+        const { data } = await api.get('/speaking/topics', {
+          signal: controller.signal,
+        });
+
+        if (controller.signal.aborted) return;
+
+        if (!PART_KEYS.every((key) => Array.isArray(data?.[key]?.topics))) {
+          throw new Error('Unexpected speaking topics response');
+        }
+
+        setParts(data);
+      } catch (err) {
+        if (controller.signal.aborted) return;
+
+        if (err.response?.status === 401) {
+          sessionStorage.removeItem(TOKEN_KEY);
+          navigate('/login', { replace: true });
+          return;
+        }
+
+        setError('Could not load speaking topics. Check that the backend is running, then try again.');
+      }
+    }
+
+    loadTopics();
+    return () => controller.abort();
+  }, [navigate, retry]);
+
+  if (!parts) {
+    return (
+      <main className="sp-page sp-loading">
+        <h1>Speaking practice</h1>
+        <p role={error ? 'alert' : 'status'}>{error || 'Loading your speaking topics…'}</p>
+
+        {error && (
+          <button
+            type="button"
+            className="sp-button"
+            onClick={() => {
+              setError('');
+              setRetry((old) => old + 1);
+            }}
+          >
+            Try again
+          </button>
+        )}
+      </main>
+    );
+  }
+
+  const current = parts[part];
+  const selected = current.topics.find((topic) => topic.id === topicId);
+
+  return (
+    <div className="sp-page">
+      <div style={feedback ? { display: 'none' } : undefined}>
+        <main className="sp-shell sp-main sp-studio">
+          <section className="sp-studio-hero" aria-labelledby="speaking-title">
+            <div>
+              <p className="sp-eyebrow">BAND BUDDY · IELTS PRACTICE</p>
+              <h1 id="speaking-title">Speaking practice</h1>
+              <p>Build confidence, one answer at a time.</p>
             </div>
 
-            <p>Automatic transcripts are not available yet. You can record your answer and listen back in the recording panel.</p>
+            <img src="/images/speaking-conversation.png" alt="" />
+          </section>
 
-            <button type="button" className="sp-button" disabled>
-              Submit for feedback
-            </button>
-          </aside>
-        </div>
-      </main>
+          {selected ? (
+            <PracticeSession
+              key={selected.id}
+              part={part}
+              config={current}
+              topic={selected}
+              onBack={() => setTopicId(null)}
+              onFeedback={setFeedback}
+              feedbackOpen={Boolean(feedback)}
+            />
+          ) : (
+            <>
+              <div className="sp-part-switch" role="group" aria-label="Speaking part">
+                {PART_KEYS.map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    aria-pressed={part === key}
+                    onClick={() => {
+                      setPart(key);
+                      setTopicId(null);
+                    }}
+                  >
+                    <strong>{parts[key].label}</strong>
+                    <span>{parts[key].title}</span>
+                  </button>
+                ))}
+              </div>
+
+              <section aria-labelledby="sp-topics-title">
+                <h2 id="sp-topics-title">Choose a topic</h2>
+                <p>{current.topics.length} practice sets · {current.tip}</p>
+
+                {current.topics.length === 0 ? (
+                  <p>No topics are currently available for this part.</p>
+                ) : (
+                  <div style={cardGrid}>
+                    {current.topics.map((topic, index) => (
+                      <article
+                        key={topic.id}
+                        className="sp-studio-panel"
+                        style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
+                      >
+                        <p className="sp-eyebrow">{current.label} · Set {index + 1}</p>
+                        <h3 style={{ margin: 0 }}>{topic.title}</h3>
+
+                        <p style={{ margin: 0 }}>
+                          {part === 'part2'
+                            ? `1 cue card · ${current.preparation_seconds / 60} min prep + ${current.practice_seconds / 60} min speaking`
+                            : `${topic.points.length + 1} questions · ${current.practice_seconds / 60} min`}
+                        </p>
+
+                        <button
+                          type="button"
+                          className="sp-button"
+                          style={{ alignSelf: 'flex-start', marginTop: 'auto' }}
+                          aria-label={`Start practice: ${topic.title}`}
+                          onClick={() => setTopicId(topic.id)}
+                        >
+                          Start practice →
+                        </button>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </>
+          )}
+        </main>
+      </div>
+
+      {feedback && (
+        <SpeakingFeedback
+          title={feedback.title}
+          question={feedback.question}
+          transcript={feedback.transcript}
+          onBack={() => setFeedback(null)}
+        />
+      )}
 
       <footer className="sp-footer">
         Band Buddy · Small steps. Meaningful progress.
