@@ -23,9 +23,8 @@ const skills = [
   {
     name: 'Listening',
     art: 'listening',
-    description: 'A new space to practise understanding spoken English.',
+    path: '/listening',
     description: 'Practise listening with audio and questions.',
-
   },
 ];
 
@@ -345,7 +344,7 @@ export default function LandingPage() {
 
                 <span className="bn-prototype-note">
                   Writing, speaking recording and sample reading are
-                  available. 
+                  available.
                 </span>
               </aside>
             </div>

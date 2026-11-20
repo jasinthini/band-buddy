@@ -110,12 +110,37 @@ function missedWords(sentence, transcript) {
   ].slice(0, 3);
 }
 
+function splitSentences(paragraph) {
+  const sentences = [];
+  let start = null;
+
+  for (let index = 0; index < paragraph.length; index += 1) {
+    const punctuation = '.!?'.includes(paragraph[index]);
+
+    if (!punctuation && start === null) {
+      start = index;
+    }
+
+    const nextIsPunctuation = '.!?'.includes(
+      paragraph[index + 1] ?? '\0',
+    );
+
+    if (start !== null && punctuation && !nextIsPunctuation) {
+      sentences.push(paragraph.slice(start, index + 1));
+      start = null;
+    }
+  }
+
+  if (start !== null) {
+    sentences.push(paragraph.slice(start));
+  }
+
+  return sentences.length ? sentences : [paragraph];
+}
+
 function QuickRead({ passage }) {
   const sentences = passage.paragraphs
-    .flatMap(
-      (paragraph) =>
-        paragraph.match(/[^.!?]+[.!?]+|[^.!?]+$/g) ?? [paragraph],
-    )
+    .flatMap(splitSentences)
     .map((sentence) => sentence.trim())
     .filter(Boolean);
 
@@ -181,7 +206,6 @@ function QuickRead({ passage }) {
       const speech = new SpeechSynthesisUtterance(line.trim());
       speech.lang = 'en-GB';
       speech.rate = rate;
-
       player.speak(speech);
     }
   }
@@ -588,7 +612,6 @@ function Quiz({ passage, active, onRunning, onWork }) {
     if (started.current !== null) return;
 
     dialog.current?.close();
-
     started.current = Date.now();
     deadline.current = started.current + passage.minutes * 60000;
 
@@ -695,9 +718,7 @@ function Quiz({ passage, active, onRunning, onWork }) {
 
       {result && (
         <div className="bb-reading-result">
-          <strong>
-            Score: {result.score}/{total}
-          </strong>
+          <strong>Score: {result.score}/{total}</strong>
 
           {saving && <span role="status">Saving…</span>}
 
@@ -812,9 +833,7 @@ function Quiz({ passage, active, onRunning, onWork }) {
                         <option value="">Choose a heading</option>
 
                         {question.options.map((option) => (
-                          <option key={option}>
-                            {option}
-                          </option>
+                          <option key={option}>{option}</option>
                         ))}
                       </select>
                     ) : (
@@ -831,9 +850,7 @@ function Quiz({ passage, active, onRunning, onWork }) {
                               type="radio"
                               name={`reading-answer-${index}`}
                               checked={value === option}
-                              onChange={() =>
-                                change(index, option)
-                              }
+                              onChange={() => change(index, option)}
                             />
                             {option}
                           </label>
@@ -842,9 +859,7 @@ function Quiz({ passage, active, onRunning, onWork }) {
                     )
                   ) : (
                     <>
-                      <label
-                        htmlFor={`reading-answer-${index}`}
-                      >
+                      <label htmlFor={`reading-answer-${index}`}>
                         Answer · maximum {question.limit ?? 1}{' '}
                         {(question.limit ?? 1) === 1
                           ? 'word'
@@ -886,9 +901,7 @@ function Quiz({ passage, active, onRunning, onWork }) {
                             : 'Unanswered'}
                       </strong>
 
-                      <p>
-                        Your answer: {value.trim() || '—'}
-                      </p>
+                      <p>Your answer: {value.trim() || '—'}</p>
 
                       {!isCorrect && (
                         <p>
@@ -958,7 +971,6 @@ export default function Reading() {
   const [mode, setMode] = useState('quiz');
   const [running, setRunning] = useState(false);
   const [hasWork, setHasWork] = useState(false);
-
   const [activePlan, setActivePlan] = useState(null);
   const [planLoading, setPlanLoading] = useState(true);
   const [planError, setPlanError] = useState('');
@@ -1046,7 +1058,6 @@ export default function Reading() {
 
   function changePage(nextPage) {
     setPage(nextPage);
-
     catalog.current?.focus({ preventScroll: true });
     catalog.current?.scrollIntoView({ block: 'start' });
   }
@@ -1103,12 +1114,7 @@ export default function Reading() {
               viewBox="0 0 180 130"
               aria-hidden="true"
             >
-              <circle
-                cx="90"
-                cy="65"
-                r="57"
-                fill="#c8e4fc"
-              />
+              <circle cx="90" cy="65" r="57" fill="#c8e4fc" />
 
               <path
                 d="M90 42Q64 26 34 34v56q30-8 56 10 26-18 56-10V34q-30-8-56 8Z"
@@ -1164,7 +1170,6 @@ export default function Reading() {
                 }}
               >
                 <option value="">All levels</option>
-
                 {LEVELS.map((item) => (
                   <option key={item}>{item}</option>
                 ))}
@@ -1181,7 +1186,6 @@ export default function Reading() {
                 }}
               >
                 <option value="">All question types</option>
-
                 {TYPES.map((item) => (
                   <option key={item}>{item}</option>
                 ))}
@@ -1287,9 +1291,7 @@ export default function Reading() {
                 ← Previous
               </button>
 
-              <span>
-                {page + 1} / {pageCount}
-              </span>
+              <span>{page + 1} / {pageCount}</span>
 
               <button
                 type="button"
