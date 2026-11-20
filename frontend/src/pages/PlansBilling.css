@@ -424,3 +424,7 @@
 .bb-plans a.bb-plan-button:hover {
   filter: brightness(.94);
 }
+
+.bb-plans-hero + section {
+  margin-top: 16px;
+}

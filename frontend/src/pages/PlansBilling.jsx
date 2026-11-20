@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import MyPlanSummary from '../components/MyPlanSummary';
+import MyPaymentHistory from '../components/MyPaymentHistory';
 import './PlansBilling.css';
 
 const skills = [
@@ -122,6 +124,8 @@ export default function PlansBilling() {
         <BillingIllustration />
       </header>
 
+      <MyPlanSummary />
+
       <p className="bb-plans-preview" role="note">
         Demo checkout is available for paid plans. No payment will be collected.
       </p>
@@ -134,7 +138,9 @@ export default function PlansBilling() {
             style={{ '--plan-index': index }}
             aria-labelledby={`bb-plan-title-${plan.id}`}
           >
-            {plan.featured && <span className="bb-plan-popular">Most popular</span>}
+            {plan.featured && (
+              <span className="bb-plan-popular">Most popular</span>
+            )}
 
             <div className="bb-plan-heading">
               <PlanIcon id={plan.id} />
@@ -172,6 +178,8 @@ export default function PlansBilling() {
           </article>
         ))}
       </section>
+
+      <MyPaymentHistory />
 
       <footer className="bb-plans-footer">
         <p>

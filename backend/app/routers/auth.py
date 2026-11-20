@@ -6,6 +6,10 @@ import secrets
 import smtplib
 import ssl
 
+from google.auth.exceptions import GoogleAuthError, TransportError
+from google.auth.transport.requests import Request as GoogleRequest
+from google.oauth2 import id_token
+
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from urllib.parse import urlencode, urlsplit
@@ -318,3 +322,76 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
 @router.get("/admin-check", response_model=UserResponse)
 def check_admin_access(current_user: User = Depends(require_admin)):
     return current_user
+
+
+class GoogleLoginRequest(BaseModel):
+    credential: str = Field(min_length=1, max_length=8192)
+
+
+@router.post("/google", response_model=LoginResponse)
+def login_with_google(
+    data: GoogleLoginRequest,
+    db: Session = Depends(get_db),
+):
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    if not client_id:
+        raise HTTPException(503, "Google sign-in is not configured.")
+
+    try:
+        claims = id_token.verify_oauth2_token(
+            data.credential,
+            GoogleRequest(),
+            audience=client_id,
+        )
+    except TransportError:
+        raise HTTPException(503, "Google verification is unavailable. Try again.") from None
+    except (ValueError, GoogleAuthError):
+        raise HTTPException(401, "Google sign-in could not be verified.") from None
+
+    google_sub = claims.get("sub")
+    email = str(claims.get("email") or "").strip().lower()
+
+    if (
+        not isinstance(google_sub, str)
+        or not 1 <= len(google_sub) <= 255
+        or not email
+        or len(email) > 254
+        or claims.get("email_verified") is not True
+    ):
+        raise HTTPException(401, "A verified Google account is required.")
+
+    user = db.scalar(select(User).where(User.google_sub == google_sub))
+
+    if user is None:
+        existing_user = db.scalar(select(User).where(User.email == email))
+        if existing_user is not None:
+            raise HTTPException(
+                409,
+                "An account already uses this email. Log in with your Band Buddy password.",
+            )
+
+        full_name = (str(claims.get("name") or "").strip() or "Band Buddy Student")[:100]
+        user = User(
+            full_name=full_name,
+            email=email,
+            password_hash=None,
+            google_sub=google_sub,
+            role="student",
+        )
+        db.add(user)
+
+        try:
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            user = db.scalar(select(User).where(User.google_sub == google_sub))
+            if user is None:
+                raise HTTPException(
+                    409,
+                    "Could not create the account. Use your usual sign-in method.",
+                ) from None
+
+    return LoginResponse(
+        access_token=create_access_token(user.id),
+        user=UserResponse.model_validate(user),
+    )
